@@ -1,0 +1,442 @@
+/* PDF Layout Fixes - Based on New Clear Rules */
+
+/* PDF Container */
+.pdf-container {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+/* Basic page structure */
+.pdf-page {
+  box-sizing: border-box;
+  background: white;
+  overflow: visible; /* Allow content to be visible for debugging */
+  page-break-after: always;
+  break-after: page;
+  display: block;
+  width: 794px;
+  height: 1122px;
+  margin: 0 auto 24px auto; /* Center pages and add spacing between them */
+  position: relative; /* Not absolute! */
+  clear: both;
+  border: 2px solid #999; /* Visible border to see pages */
+  float: none; /* Ensure no floating issues */
+}
+
+/* Content areas */
+.pdf-content-area {
+  overflow: visible; /* Allow content to be visible */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+}
+
+/* Profile sidebar styling */
+.profile-sidebar {
+  width: 150px;
+  padding: 16px 8px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* Section layouts */
+.section {
+  margin-bottom: 24px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Two-column section styling */
+.two-column-section {
+  column-count: 2 !important;
+  column-gap: 1.5rem !important;
+  text-align: justify !important;
+  column-fill: balance !important;
+  /* Debug border to visualize 2-column sections */
+  border: 2px solid rgba(0, 128, 255, 0.5) !important;
+  padding: 8px !important;
+  background-color: rgba(0, 128, 255, 0.05) !important;
+  overflow: visible !important; /* Allow content to be visible */
+  box-sizing: border-box !important;
+  width: 100% !important; /* Ensure section doesn't exceed container width */
+  max-width: 100% !important;
+}
+
+/* Allow natural column flow */
+.two-column-section p {
+  margin-bottom: 0.75rem;
+  break-inside: avoid;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Single-column section styling */
+.single-column-section {
+  column-count: 1;
+  /* Debug border to visualize single-column sections */
+  border: 2px solid rgba(255, 0, 0, 0.5) !important;
+  padding: 8px !important;
+  background-color: rgba(255, 0, 0, 0.05) !important;
+}
+
+/* Large images that should span full width */
+.single-column-image {
+  max-width: 100%;
+  display: block;
+  margin: 0.5rem auto;
+  column-span: all;
+  -webkit-column-span: all;
+}
+
+/* Images in 2-column layout */
+.two-column-section img {
+  max-width: 90%;
+  height: auto;
+  display: block;
+  margin: 0.5rem auto;
+}
+
+/* Orphan heading prevention */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  page-break-after: avoid;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  break-after: avoid;
+}
+
+/* Section break controls */
+.section {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Typography improvements */
+p {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+/* List styling */
+ul,
+ol {
+  margin-bottom: 0.75rem;
+  padding-left: 1.2rem;
+}
+
+li {
+  margin-bottom: 0.25rem;
+}
+
+/* Table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+th,
+td {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+/* Responsive adjustments */
+@media print {
+  .pdf-page {
+    page-break-after: always;
+    margin: 0;
+    padding: 0;
+  }
+
+  .two-column-section {
+    column-count: 2;
+    column-gap: 1.5rem;
+  }
+
+  .single-column-image {
+    column-span: all;
+    -webkit-column-span: all;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+}
+
+/* Cover + Content on Same Page */
+.pdf-page .cover {
+  flex-shrink: 0; /* Cover takes fixed space */
+}
+
+.pdf-page .flex.flex-1 {
+  flex: 1; /* Content area takes remaining space */
+  min-height: 0;
+}
+
+/* Content Area Fixes */
+.pdf-content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Reduced gap for tighter layout */
+  min-height: 0; /* Allow flex shrinking */
+  overflow: visible !important; /* Allow content to flow to next page */
+  padding: 16px; /* Default padding for all content areas */
+  box-sizing: border-box;
+  width: 100%; /* Ensure full width */
+}
+
+.pdf-content-area.with-profile {
+  padding-left: 8px; /* Reduced left padding when profile is present */
+  padding-right: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.pdf-content-area.flex-1 {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Section Layout Fixes */
+.section-1col {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 12px; /* Reduced margin */
+}
+
+.section-2col {
+  columns: 2;
+  column-gap: 20px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 12px; /* Reduced margin */
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Force single column for media in 2-column sections */
+.section-2col .media-block {
+  column-span: all;
+  break-inside: avoid;
+  margin: 8px 0;
+}
+
+/* Individual Content Block Fixes */
+.pdf-section {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 8px; /* Reduced from default */
+  padding: 8px 12px; /* Reduced padding */
+}
+
+.pdf-section.heading {
+  margin-bottom: 4px; /* Minimal margin for headings */
+  margin-top: 12px; /* Space above headings */
+}
+
+.pdf-section.paragraph {
+  margin-bottom: 6px; /* Tight paragraph spacing */
+  line-height: 1.4; /* Reduced line height for compactness */
+}
+
+/* Typography Fixes */
+.pdf-section p {
+  margin: 0;
+  orphans: 2;
+  widows: 2;
+  text-align: justify;
+  hyphens: auto;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.pdf-section h1,
+.pdf-section h2,
+.pdf-section h3 {
+  margin: 0;
+  line-height: 1.2;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* Image Fixes */
+.pdf-section.image {
+  margin: 8px 0;
+  text-align: center;
+}
+
+.pdf-section img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Quote Fixes */
+.pdf-section.quote {
+  margin: 12px 0;
+  padding: 12px 20px;
+}
+
+/* List Fixes */
+.pdf-section.list {
+  margin-bottom: 8px;
+}
+
+.pdf-section ul,
+.pdf-section ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.pdf-section li {
+  margin-bottom: 2px;
+}
+
+/* Table Fixes */
+.pdf-section.table {
+  margin: 12px 0;
+  overflow: visible;
+}
+
+.pdf-section table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.pdf-section td,
+.pdf-section th {
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+/* Profile Sidebar Fixes */
+.profile-sidebar {
+  width: 150px;
+  flex-shrink: 0;
+  padding: 20px 15px;
+  background-color: #e7eef1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Flex Container for Profile + Content */
+.page-with-profile {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Prevent overflow and improve text flow */
+.text-content {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* 2-Column specific fixes */
+.section-2col .pdf-section.paragraph {
+  break-inside: auto; /* Allow column breaks within paragraphs */
+}
+
+.section-2col .pdf-section.heading,
+.section-2col .pdf-section.image,
+.section-2col .pdf-section.quote,
+.section-2col .pdf-section.table {
+  column-span: all; /* Force full width for these elements */
+  break-inside: avoid;
+}
+
+/* Remove excessive spacing in compact mode */
+.compact-layout .pdf-section {
+  margin-bottom: 4px;
+  padding: 4px 8px;
+}
+
+.compact-layout .section-1col,
+.compact-layout .section-2col {
+  margin-bottom: 8px;
+}
+
+/* Fix for headers that should never be orphaned */
+.pdf-section.heading + .pdf-section {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+/* Ensure proper spacing between different content types */
+.pdf-section.heading ~ .pdf-section.paragraph:first-of-type {
+  margin-top: 0;
+}
+
+.pdf-section.image + .pdf-section.paragraph {
+  margin-top: 8px;
+}
+
+/* Print-specific optimizations */
+@media print {
+  .pdf-page {
+    page-break-inside: avoid;
+  }
+
+  .pdf-section {
+    page-break-inside: avoid;
+  }
+
+  .section-2col {
+    page-break-inside: avoid;
+  }
+}
+
+/* Block-level element styles for individual block processing */
+.block-1col {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 16px;
+}
+
+.block-2col {
+  columns: 2;
+  column-gap: 24px;
+  column-fill: balance;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 16px;
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Force media elements to span full width in 2-column blocks */
+.block-2col img,
+.block-2col figure,
+.block-2col table,
+.block-2col ul,
+.block-2col ol,
+.block-2col h1,
+.block-2col h2,
+.block-2col h3,
+.block-2col h4,
+.block-2col h5,
+.block-2col h6 {
+  column-span: all;
+  break-inside: avoid;
+  margin-bottom: 12px;
+}

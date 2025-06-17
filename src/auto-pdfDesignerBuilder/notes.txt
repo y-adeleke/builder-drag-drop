@@ -1,0 +1,1219 @@
+response from abckend:
+{
+  "title": "Complete Guide to Modern Web Development",
+  "backgroundImg": "https://example.com/images/web-dev-hero.jpg",
+  "date": "Published on June 16, 2025",
+  "sections": [
+    {
+      "id": 1,
+      "level": null,
+      "heading": null,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Welcome to our comprehensive guide on modern web development. This tutorial will cover everything from basic concepts to advanced techniques.",
+          "style": {
+            "font-size": "18px",
+            "color": "#333"
+          }
+        },
+        {
+          "type": "image",
+          "src": "https://example.com/images/intro-diagram.png",
+          "alt": "Web development overview diagram",
+          "style": {}
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "level": 2,
+      "heading": {
+        "type": "heading",
+        "text": "Frontend Technologies",
+        "level": 2,
+        "style": {
+          "color": "#2c3e50",
+          "margin-bottom": "20px"
+        }
+      },
+      "content": [
+        {
+          "type": "heading",
+          "text": "Frontend Technologies",
+          "level": 2,
+          "style": {
+            "color": "#2c3e50",
+            "margin-bottom": "20px"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": "Frontend development encompasses various technologies and frameworks that create the user interface.",
+          "style": {}
+        },
+        {
+          "type": "heading",
+          "text": "HTML and CSS",
+          "level": 3,
+          "style": {}
+        },
+        {
+          "type": "paragraph",
+          "text": "HTML provides the structure while CSS handles the styling of web pages.",
+          "style": {}
+        },
+        {
+          "type": "list",
+          "items": [
+            "Semantic HTML5 elements",
+            "CSS Grid and Flexbox",
+            "Responsive design principles"
+          ],
+          "style": {}
+        },
+        {
+          "type": "heading",
+          "text": "JavaScript Frameworks",
+          "level": 3,
+          "style": {}
+        },
+        {
+          "type": "paragraph",
+          "text": "Modern JavaScript frameworks make building complex applications easier.",
+          "style": {}
+        },
+        {
+          "type": "table",
+          "rows": [
+            ["Framework", "Learning Curve", "Community"],
+            ["React", "Medium", "Very Large"],
+            ["Vue", "Easy", "Large"],
+            ["Angular", "Hard", "Large"]
+          ],
+          "style": {}
+        },
+        {
+          "type": "heading",
+          "text": "CSS Preprocessors",
+          "level": 3,
+          "style": {}
+        },
+        {
+          "type": "paragraph",
+          "text": "Sass and Less extend CSS with variables, mixins, and functions.",
+          "style": {}
+        }
+      ],
+      "subsections": [
+        {
+          "level": null,
+          "heading": null,
+          "content": [
+            {
+              "type": "heading",
+              "text": "Frontend Technologies",
+              "level": 2,
+              "style": {
+                "color": "#2c3e50",
+                "margin-bottom": "20px"
+              }
+            },
+            {
+              "type": "paragraph",
+              "text": "Frontend development encompasses various technologies and frameworks that create the user interface.",
+              "style": {}
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "heading": {
+            "type": "heading",
+            "text": "HTML and CSS",
+            "level": 3,
+            "style": {}
+          },
+          "content": [
+            {
+              "type": "heading",
+              "text": "HTML and CSS",
+              "level": 3,
+              "style": {}
+            },
+            {
+              "type": "paragraph",
+              "text": "HTML provides the structure while CSS handles the styling of web pages.",
+              "style": {}
+            },
+            {
+              "type": "list",
+              "items": [
+                "Semantic HTML5 elements",
+                "CSS Grid and Flexbox",
+                "Responsive design principles"
+              ],
+              "style": {}
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "heading": {
+            "type": "heading",
+            "text": "JavaScript Frameworks",
+            "level": 3,
+            "style": {}
+          },
+          "content": [
+            {
+              "type": "heading",
+              "text": "JavaScript Frameworks",
+              "level": 3,
+              "style": {}
+            },
+            {
+              "type": "paragraph",
+              "text": "Modern JavaScript frameworks make building complex applications easier.",
+              "style": {}
+            },
+            {
+              "type": "table",
+              "rows": [
+                ["Framework", "Learning Curve", "Community"],
+                ["React", "Medium", "Very Large"],
+                ["Vue", "Easy", "Large"],
+                ["Angular", "Hard", "Large"]
+              ],
+              "style": {}
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "heading": {
+            "type": "heading",
+            "text": "CSS Preprocessors",
+            "level": 3,
+            "style": {}
+          },
+          "content": [
+            {
+              "type": "heading",
+              "text": "CSS Preprocessors",
+              "level": 3,
+              "style": {}
+            },
+            {
+              "type": "paragraph",
+              "text": "Sass and Less extend CSS with variables, mixins, and functions.",
+              "style": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "level": 2,
+      "heading": {
+        "type": "heading",
+        "text": "Backend Development",
+        "level": 2,
+        "style": {}
+      },
+      "content": [
+        {
+          "type": "heading",
+          "text": "Backend Development",
+          "level": 2,
+          "style": {}
+        },
+        {
+          "type": "paragraph",
+          "text": "Backend development focuses on server-side logic, databases, and API development.",
+          "style": {}
+        },
+        {
+          "type": "quote",
+          "text": "A good backend is invisible to the user but essential for the application.",
+          "style": {
+            "font-style": "italic",
+            "border-left": "4px solid #3498db",
+            "padding-left": "20px"
+          }
+        },
+        {
+          "type": "list",
+          "items": [
+            "Server architecture and design",
+            "Database management and optimization",
+            "API design and security",
+            "Performance monitoring and scaling"
+          ],
+          "style": {}
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "level": 2,
+      "heading": {
+        "type": "heading",
+        "text": "DevOps and Deployment",
+        "level": 2,
+        "style": {}
+      },
+      "content": [
+        {
+          "type": "heading",
+          "text": "DevOps and Deployment",
+          "level": 2,
+          "style": {}
+        },
+        {
+          "type": "paragraph",
+          "text": "Modern web development requires understanding deployment strategies and DevOps practices.",
+          "style": {}
+        },
+        {
+          "type": "heading",
+          "text": "CI/CD Pipelines",
+          "level": 3,
+          "style": {}
+        },
+        {
+          "type": "paragraph",
+          "text": "Continuous Integration and Deployment automate the development workflow.",
+          "style": {}
+        },
+        {
+          "type": "heading",
+          "text": "Cloud Platforms",
+          "level": 3,
+          "style": {}
+        },
+        {
+          "type": "paragraph",
+          "text": "AWS, Google Cloud, and Azure provide scalable hosting solutions.",
+          "style": {}
+        },
+        {
+          "type": "image",
+          "src": "https://example.com/images/cloud-architecture.png",
+          "alt": "Cloud deployment architecture diagram",
+          "caption": "Typical cloud deployment architecture",
+          "style": {}
+        }
+      ],
+      "subsections": [
+        {
+          "level": null,
+          "heading": null,
+          "content": [
+            {
+              "type": "heading",
+              "text": "DevOps and Deployment",
+              "level": 2,
+              "style": {}
+            },
+            {
+              "type": "paragraph",
+              "text": "Modern web development requires understanding deployment strategies and DevOps practices.",
+              "style": {}
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "heading": {
+            "type": "heading",
+            "text": "CI/CD Pipelines",
+            "level": 3,
+            "style": {}
+          },
+          "content": [
+            {
+              "type": "heading",
+              "text": "CI/CD Pipelines",
+              "level": 3,
+              "style": {}
+            },
+            {
+              "type": "paragraph",
+              "text": "Continuous Integration and Deployment automate the development workflow.",
+              "style": {}
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "heading": {
+            "type": "heading",
+            "text": "Cloud Platforms",
+            "level": 3,
+            "style": {}
+          },
+          "content": [
+            {
+              "type": "heading",
+              "text": "Cloud Platforms",
+              "level": 3,
+              "style": {}
+            },
+            {
+              "type": "paragraph",
+              "text": "AWS, Google Cloud, and Azure provide scalable hosting solutions.",
+              "style": {}
+            },
+            {
+              "type": "image",
+              "src": "https://example.com/images/cloud-architecture.png",
+              "alt": "Cloud deployment architecture diagram",
+              "caption": "Typical cloud deployment architecture",
+              "style": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "level": 2,
+      "heading": {
+        "type": "heading",
+        "text": "Conclusion",
+        "level": 2,
+        "style": {}
+      },
+      "content": [
+        {
+          "type": "heading",
+          "text": "Conclusion",
+          "level": 2,
+          "style": {}
+        },
+        {
+          "type": "paragraph",
+          "text": "Web development is an ever-evolving field that requires continuous learning and adaptation.",
+          "style": {}
+        },
+        {
+          "type": "divider",
+          "style": {}
+        },
+        {
+          "type": "paragraph",
+          "text": "Keep practicing, stay updated with the latest trends, and never stop building!",
+          "style": {
+            "font-weight": "bold",
+            "text-align": "center"
+          }
+        }
+      ]
+    }
+  ],
+  "description": null,
+  "profiles": {
+    "name": null,
+    "picture": null,
+    "title": null
+  }
+}
+
+
+mycover design html:
+ <div class="brand-logo">
+        <img class="cover-image theme-long-ribbon-brand-logo"
+             src="https://www.rbcroyalbank.com/dvl/assets/images/logos/rbc-logo-shield.svg" alt="logo"/>
+        RBC BlueBay<br/>Asset Management
+      </div>
+      <img class="logo"
+           src="https://www.rbcroyalbank.com/dvl/assets/images/logos/rbc-logo-shield.svg" alt="logo"/>
+      <div class="cover-image cover-image-theme-1"></div>
+      <div class="title-frame theme-long-ribbon-title-frame">
+        <span class="title">RBC BlueBay Asset Management</span>
+        <span class="desc">6 reasons to invest in emerging markets</span>
+      </div>`;
+
+
+      my profile html: 
+      <div class="profiles-frame">
+        <div class="profile-frame">
+          <div class="profile">
+            <img src="https://www.rbcgam.com/_assets/images/people/avatars/dan-chornous.jpg"
+                 alt="profile-image" class="profile-image"/>
+            <span class="name">Richard Farrell</span>
+            <span class="title">EM Equity Portfolio Manager</span>
+          </div>
+          <div class="profile">
+            <img src="https://www.rbcgam.com/_assets/images/people/avatars/dan-chornous.jpg"
+                 alt="profile-image" class="profile-image"/>
+            <span class="name">Angel Su</span>
+            <span class="title">EM Equity Associate</span>
+            <span class="title">Portfolio Manager</span>
+          </div>
+        </div>
+        <div class="publish-date-frame">
+          <span>Published December 2024</span>
+        </div>
+      </div>`;
+// src/pdf/ArticleExtractor.tsx
+import React, { useState } from "react";
+import { ContentBlock } from "./blocks/BlockTypes";
+
+export interface ExtractedArticle {
+  title: string;
+  backgroundImg: string | null;
+  date: string;
+  sections: Array<{
+    id: number;
+    level: number | null;
+    heading: ContentBlock | null;
+    content: ContentBlock[];
+    subsections?: Array<{
+      level: number | null;
+      heading: ContentBlock | null;
+      content: ContentBlock[];
+    }>;
+  }>;
+  description: string | null;
+  profiles: { name: string | null; picture: string | null; title: string | null };
+}
+
+interface ArticleExtractorProps {
+  onExtract: (data: ExtractedArticle) => void;
+}
+
+const ArticleExtractor: React.FC<ArticleExtractorProps> = ({ onExtract }) => {
+  const [url, setUrl] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFetch = async () => {
+    if (!url) return setError("Please enter a URL");
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("http://localhost:3000/api/extract-article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) throw new Error(`Server responded ${res.status}`);
+      const data: ExtractedArticle = await res.json();
+      onExtract(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch article");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="mb-4 flex space-x-2">
+      <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Enter article URL" className="flex-1 p-2 border rounded" />
+      <button onClick={handleFetch} disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50">
+        {loading ? "Loading..." : "Fetch Article"}
+      </button>
+      {error && <div className="text-red-500 mt-2">{error}</div>}
+    </div>
+  );
+};
+
+export default ArticleExtractor;
+
+// ----------------------------------------------------------------
+// Canonical content types
+// ----------------------------------------------------------------
+export type BlockType = "heading" | "paragraph" | "image" | "quote" | "list" | "table" | "link" | "divider" | "video" | "audio" | "embed" | "definitionList" | "span";
+
+import { CSSProperties } from "react";
+
+export interface ContentBlock {
+  type: BlockType;
+  text?: string;
+  level?: number;
+  src?: string;
+  alt?: string;
+  items?: string[];
+  rows?: string[][];
+  layout?: "1col" | "2col" | "1col-bg" | "quote";
+  style?: CSSProperties;
+}
+
+// ----------------------------------------------------------------
+// Layout atoms used only by the paginator
+// ----------------------------------------------------------------
+export interface Bundle {
+  blocks: ContentBlock[]; // one or more blocks that can’t be split
+  height: number; // measured once ‑ reused many times
+  splittable?: boolean; // oversized paragraphs allowed to split
+  shrinkable?: boolean;
+  baseHeight?: number;
+}
+
+// pdf/blocks/SectionRenderer.tsx
+import React, { CSSProperties } from "react";
+import { Theme } from "../themes";
+import { ContentBlock } from "./BlockTypes";
+
+/* helper: kebab‑case → camelCase */
+const toCamel = (k: string) => k.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+/* helper: clone + camel‑case all keys in a style object */
+function fixStyle(style?: CSSProperties): CSSProperties | undefined {
+  if (!style) return;
+  const fixed: Record<string, string | number> = {};
+  Object.entries(style).forEach(([k, v]) => (fixed[toCamel(k)] = v));
+  return fixed;
+}
+
+export const SectionRenderer: React.FC<{
+  block: ContentBlock;
+  theme: Theme;
+}> = ({ block, theme }) => {
+  /* 1 · merge theme font + camel‑case inline styles */
+  const mergedStyle: CSSProperties = {
+    fontFamily: theme.fontFamily,
+    // ...fixStyle(block.style),
+  };
+
+  /* 2 · render by type */
+  switch (block.type) {
+    case "heading": {
+      const HeadingTag = block.level === 1 ? "h1" : block.level === 3 ? "h3" : "h2";
+      return (
+        <div style={mergedStyle} className={`pdf-section ${theme.headingBgColor} p-4`}>
+          <HeadingTag className={`font-bold text-xl ${theme.accentColor}`}>{block.text}</HeadingTag>
+        </div>
+      );
+    }
+
+    case "paragraph":
+      return (
+        <div style={mergedStyle} className={`pdf-section ${theme.textColor} leading-relaxed p-4 ${block.layout === "2col" ? "columns-2 gap-6" : ""}`}>
+          <p>{block.text}</p>
+        </div>
+      );
+
+    case "image":
+      return (
+        <div style={mergedStyle} className="pdf-section my-4">
+          <img src={block.src} alt={block.alt} className="w-full rounded" />
+        </div>
+      );
+
+    case "quote":
+      return (
+        <div style={mergedStyle} className={`pdf-section ${theme.quoteBgColor} italic text-center px-6 py-4 text-lg`}>
+          “{block.text}”
+        </div>
+      );
+
+    case "list":
+      return (
+        <div style={mergedStyle} className="pdf-section p-4">
+          <ul className="list-disc pl-5">{block.items?.map((item, i) => <li key={i}>{item}</li>)}</ul>
+        </div>
+      );
+
+    case "table":
+      return (
+        <div style={mergedStyle} className="pdf-section overflow-x-auto p-4">
+          <table className={`min-w-full border text-sm ${theme.borderColor}`}>
+            <tbody>
+              {block.rows?.map((row, i) => (
+                <tr key={i}>
+                  {row.map((cell, j) => (
+                    <td key={j} className={`border px-3 py-2 ${theme.borderColor}`}>
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+
+    case "link":
+      return (
+        <div style={mergedStyle} className="pdf-section p-4">
+          <a href={block.src} className={`${theme.accentColor} underline`} target="_blank" rel="noopener noreferrer">
+            {block.text}
+          </a>
+        </div>
+      );
+
+    case "divider":
+      return (
+        <div style={mergedStyle} className="pdf-section my-4">
+          <hr className={theme.borderColor} />
+        </div>
+      );
+
+    case "video":
+      return (
+        <div style={mergedStyle} className="pdf-section my-4">
+          <video controls className="w-full" src={block.src} />
+        </div>
+      );
+
+    case "audio":
+      return (
+        <div style={mergedStyle} className="pdf-section my-4">
+          <audio controls src={block.src} />
+        </div>
+      );
+
+    case "embed":
+      return <div style={mergedStyle} className="pdf-section my-4" dangerouslySetInnerHTML={{ __html: block.text || "" }} />;
+
+    case "definitionList":
+      return (
+        <div style={mergedStyle} className="pdf-section p-4">
+          <dl>
+            {block.items?.map((item, i) => {
+              const [term, def] = item.split("|");
+              return (
+                <React.Fragment key={i}>
+                  <dt className="font-bold">{term}</dt>
+                  <dd className="ml-4 mb-2">{def}</dd>
+                </React.Fragment>
+              );
+            })}
+          </dl>
+        </div>
+      );
+
+    case "span":
+      return (
+        <div style={mergedStyle} className="pdf-section p-4">
+          <span className={theme.textColor}>{block.text}</span>
+        </div>
+      );
+
+    default:
+      return null;
+  }
+};
+
+
+# Frontend Layout Rules
+
+_Assume your renderer iterates over `sections` and, where present, `section.subsections`._
+
+---
+first page will have cover deisgn of height of 420px or so. below the first page we will ahve 150 width to the left which our profile will set and the remaning space on the right is where our content will begin. sometimes we might not need profile. which emans after cover page we will have thw whole sace to begin our section.
+
+## 1. No filler
+
+**Never** inject dummy blank blocks. Rely on true section boundaries and smart pagination.
+
+## 2. No orphan headers or widows/orphans
+
+- Render every heading with `breakInside="avoid"` (or `page-break-inside: avoid`).
+- For paragraphs, set `orphans: 2`, `widows: 2` so at least two lines stay together.
+
+## 3. First‑body‑page column mode (below cover)
+
+**UI toggle:** `showProfile: boolean`
+
+- If `showProfile === true`
+  - Page 2 → left sidebar (fixed 150 px) + **single‑column** content on the right.
+- If `showProfile === false`
+  - Page 2 → full‑width, apply two‑column rules immediately if eligible.
+
+## 4. Force‑new‑page before a new section if space is tight
+
+- Define a **threshold** (e.g. `150 px`).
+- Before rendering Section *N*, if
+  ```js
+  remainingVerticalSpaceOnPage < threshold
+  && next block is a new section heading
+  ```
+
+then start a fresh page.
+
+5. Image + caption/note atomicity
+   Treat any image + its one‑liner (caption or note) as a single bundle.
+
+If that bundle slightly overflows:
+
+Shrink the image (preserve aspect ratio) down to a minimum (e.g. 60 % of original) so the note fits.
+
+If still too tall, push the entire bundle to the next page.
+
+6. Consecutive headers are OK
+   You may have <h2> followed immediately by <h3>.
+
+Render back‑to‑back, each with breakInside="avoid". No merging needed.
+
+7. Two‑column usage
+   Default: render text‑only sections/subsections in two columns to save pages.
+
+Exceptions (always single‑column):
+
+Images(images withina sub section or so should sjould be in 2 column if the rest of its sections are in 2 column), videos, audio embeds
+
+Tables (unless row‑by‑row splitting)
+
+Large custom embeds or charts
+
+Hybrid: within a section you can mix two‑column for text and full‑width for media/tables.
+
+Extra Edge‑Cases to Consider
+Table splitting policy: decide row‑by‑row breaks or full‑width.
+
+Video/audio sizing: typically full‑width, not cramped in columns.
+
+Column balance: avoid > 30 % height difference between columns.
+
+
+//////////////////////
+okay listen revert revert revert as much as possible...im here to clarify the rules :
+
+1. in the first page we have cover page and the remainder of the page will be divedied into 2 on the left is 150px profile section and on the right is where content begins all the way to end. 
+
+2. backend already grouped sections for us so we have section and subsection too
+
+3. two column layout: if in a section, there is a text element that the length is greater than 700 chars, render the whole section into 2 columns no matter what is the section be itlist, iamge etc. otherise use a single column. 
+add class two-column-section which has { column-count2; column-ga:1.5rem; text-align: justify} what goes inside? all content of the section: paragrapgh, images, lists etc 
+images in 2 column will have maxwidth of 90%
+
+4. large images & single-column images .single-column-image
+how to detect? if the image filenaee src attrivbute contains any of these keyword(case sensitive):large, _xl, big, banner, hero you can use regex for this:/(large|_xl|big|banner|hero)\.(jpg|png|jpeg)/i
+wrap it in a div class single-column-image styel {max-width:100&; display:block; margnin 0.5rem auto;
+when to use? large column should always span full width of the page /column even inside a two-column section. 
+
+5. page breaks:
+after first page content, always insert page break 
+between sections: insert page breaks as needed to avoid orphaned headings 
+
+6. Orphan heading handling (no orphan heading)
+a heading at the bottom of the page with its content starting on the next page is bad. before rendeing a sectiom, cheack if the heading would be the last element on  a page.if so, insert a page break before the heading so the heding and at least the first cntent appear together 
+css support:
+h1,h2,h3,h4.h5{ page-break-after: avoid; page-break-inside:avoid; break-inside:avoid;} section{page-break-inside:avoid; break-inside:avoid;}
+extra logic:
+if you can mesure rendered height, ensure at least one content element after the heading fits in the same page. if not, force a page break befire the heading.
+
+
+can we refine our application based on this nw rule and we can abadon old confusing rules because one application cirrently doesnt work well. 
+api still sening same strcuture which is diff from out sample
+
+{
+    "title": "",
+    "backgroundImg": null,
+    "date": "",
+    "sections": [
+        {
+            "id": 1,
+            "level": null,
+            "heading": null,
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "The economic backdrop has been highly volatile as President Trump negotiates trade agreements with economies around the world. Progress is being made on several fronts, though, and peak fear related to tariffs is now likely behind. The U.S. has struck trade deals with the U.K. and China, and reciprocal tariffs have been delayed at least until July/August. That said, some level of tariffs remain in place and the ultimate impact on the economy from increased taxation on global trade remains to be seen. So far, confidence of businesses and consumers has taken a hit, but actual economic data has been resilient and leading indicators continue to point to modest growth (exhibits 1 and 2). Overall, we look for slow but positive economic growth in 2025 and recognize that the odds of recession, though not trivial, have diminished due to Trump’s willingness to dial back extreme tariff threats. Looking further ahead, we expect growth to accelerate a bit into 2026 as tariff uncertainty ultimately diminishes and fiscal stimulus offers support.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 1: U.S. consumer and small business confidence",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "image",
+                    "src": "https://www.rbcgam.com/dA/51a40aaa6f12ee40d153f4be0002f210",
+                    "alt": "Exhibit 1 US consumer and small business confidence",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Note: As of May 30, 2025. Source: Bloomberg, RBC GAM",
+                    "style": {}
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 2: Global purchasing managers’ indices",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "image",
+                    "src": "https://www.rbcgam.com/dA/e5657ff89cc66715cb9729402a26a0cc",
+                    "alt": "Exhibit 2 Global purchasing managers indices",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Source: Macrobond, RBC GAM",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "A variety of other risks complicate the outlook in addition to tariffs. Investors have become increasingly concerned with heightened government debt levels, evidenced by a rise in long-term borrowing costs which, if exacerbated, threatens to destabilize financial markets. Moreover, geopolitical tensions remain elevated and military activity has been intense in the Middle East and Russia/Ukraine. These risks are likely to be sources of uncertainty and volatility for the economy and asset prices.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "U.S. dollar decline reveals investors’ reduced preference for U.S. assets",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Currency market movements may be signalling a shift in investor preference away from U.S. assets. The U.S. Dollar Index declined 10% since January despite extreme financial-market volatility and heightened investor fear which, in the past, have acted as tailwinds to the dollar (Exhibit 3). The timing and magnitude of the drop suggests investors may be questioning U.S. exceptionalism and the safe-haven status of the U.S. dollar. Given that the currency remains extremely overvalued, even after this recent drop, we believe that much more weakness still lies ahead. For global investors, these currency moves are critical in comparing assets on a common currency basis, where the dollar’s decline has been a drag on U.S. stock and bond performance so far this year relative to international assets.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 3: U.S. Dollar Index (DXY)",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "image",
+                    "src": "https://www.rbcgam.com/dA/4919a30c1f9e1037da28b7e8c9644c2c",
+                    "alt": "Exhibit 3 US Dollar Index DXY",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Note: As of May 30, 2025. Source: Bloomberg, RBC GAM",
+                    "style": {}
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "The Fed likely resumes rate cutting later this year amid slowing growth",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Many developed-world central banks have continued lowering interest rates in this environment to support economic activity, but further rate relief may be limited if inflation proves stubborn. In the U.S., the Fed has been on pause so far this year since the labour market is healthy and inflation remains slightly above the 2.0% target. Progress on inflation coming down could be temporarily delayed until 2026 due to tariffs, though it is important for the Fed to not overreact to heightened inflation pressure in the near-term given that any price-boost from tariffs is unlikely to be repeated. We expect that slowing growth will nudge the Fed to deliver three 25-basis-point cuts over the next year, in line with what the market has priced in (Exhibit 4), and we recognize that, should the economy weaken further, the Fed has ample capacity to lower interest rates from the currently restrictive stance. Ultimately, the path for rates will depend on the actual data and how trade policy evolves.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 4: Implied fed funds rate",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "12-months futures contracts as of May 30, 2025",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/f8916fef9d9a4d106d7bda37627b407e",
+                            "alt": "Exhibit 4 Implied fed funds rate",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Source: Bloomberg, U.S. Federal Reserve, RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Government bonds offer attractive return potential, modest valuation risk",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Sovereign bond yields have fluctuated in a large range as investors weighed growth, inflation and fiscal concerns. The U.S. 10-year yield fell as low as 3.86% shortly following Trump’s announcement of reciprocal tariffs, a major headwind to growth, in early April then briefly climbed over 4.60% in May following Moody’s U.S. credit-rating downgrade and concern regarding sustainability of the U.S. fiscal position exacerbated by the One Big Beautiful Bill. Currently at around 4.40%, the U.S. 10-year yield is above our modelled estimate of equilibrium, which suggests that sovereign bonds offer decent return potential with only moderate valuation risk (Exhibit 5).",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 5: U.S. 10-year T-bond yield",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "Equilibrium range",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/8d5dc1dd266031f673b258c54cad5a03",
+                            "alt": "Exhibit 5 US 10 year T bond yield",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Note: As of May 31, 2025. Source: RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Stocks rebound from intense sell-off, led by non-U.S. regions",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Global equities experienced extreme volatility during the past quarter with some major indices experiencing bear-market declines of more than 20%. U.S. equities led the downturn as tariff threats escalated, with the tech-heavy NASDAQ falling 24% from its December 2024 peak and the Russell 2000 Small Cap Index falling 28% from its November peak. The S&P 500 fell just shy of a bear market with a 19% peak-to-trough decline, while international equity markets outperformed especially when factoring in recent U.S. dollar weakness (Exhibit 6). Following Trump’s announcement of a 90-day pause to reciprocal tariffs, though, stocks enjoyed a powerful rally, further boosted by the trade deal with China. As a result, most major indices fully erased their prior losses and many non-U.S. markets climbed to new records. The latest rally did push U.S. large-cap stocks back to expensive territory, limiting their return potential. But our models suggest that global stocks, in aggregate, are not expensive and that equity markets outside North America are trading at attractive distances below their fair value (Exhibit 7).",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 6: Major indices’ price change in USD",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "2025 year-to-date",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/26bb9ea9a15b5ef521f0d788499a1ecc",
+                            "alt": "Exhibit 6 Major indices price change in USD",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Note: As of May 30, 2025. Magnificent 7 includes Apple, Microsoft, Alphabet, Amazon, Nvidia, Meta and Tesla. Source: Bloomberg, RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 7: Global stock market composite",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "Equity market indexes relative to equilibrium",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/44041924cbff2a40ac72af8cfbe52d9e",
+                            "alt": "Exhibit 7 Global stock market composite",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Note: As of May 30, 2025. Source: RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 13,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Strong profit growth and maintaining elevated investor confidence are critical to sustaining further gains in the S&P 500",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "With U.S. large-cap stocks trading at premium valuations, maintaining high investor confidence as well as generating solid earnings growth will be critical to sustaining further gains from here. Analysts look for 8.5% profit growth in 2025 followed by 13.5% growth in 2026. Should the S&P 500 trade between 0.5 standard deviations to a full standard deviation above equilibrium, it can deliver low single-digit to high single-digit annualized returns through the end of 2026 if the consensus earnings estimates are achieved (Exhibit 8). That said, earnings growth could face headwinds, particularly if profit margins weaken due to tariffs and re-shoring production to the U.S., which could increase input costs and reduce operating efficiencies. Should profits fail to meet expectations, U.S. stocks would be vulnerable given the starting point of elevated valuations and heightened investor enthusiasm.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 14,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 8: Earnings estimates and alternative scenarios for valuations and outcomes for the S&P 500",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "image",
+                    "src": "https://www.rbcgam.com/dA/bb9fb8dd89e6c59e1d85182f14c43e8d",
+                    "alt": "Exhibit 8 Earnings estimates and alternative scenarios for valuations and outcomes for the SP 500",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Note: As of May 30, 2025. Total returns for 2026 are annualized. Source: LSEG I/B/E/S, RBC GAM",
+                    "style": {}
+                }
+            ]
+        },
+        {
+            "id": 15,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Asset mix: increased equity allocation slightly with tilt to non-U.S. markets",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Our asset mix balances the risks and opportunities and considers that the current range of outcomes is unusually wide. In our base case scenario, the economy will continue growing at a sluggish pace against a backdrop of modest inflation, allowing for some further central-bank easing. In this environment, we expect sovereign bonds to deliver mid-single-digit returns over the year ahead as long as inflation continues falling toward central bankers’ targets, with the possibility of higher returns should the economy encounter a meaningful slowdown. Although stocks have already enjoyed an impressive recovery, we continue to expect stocks to outperform bonds. Furthermore, the equity-market sell off in March/April generated extremely oversold conditions that have historically been consistent with durable market bottoms. As a result, we added 1% to our equity allocation during the quarter, sourced from cash, favouring regions outside the U.S. where valuations are relatively more appealing. Our current recommended asset mix for a global balanced investor is 61.0% equities (strategic: “neutral”: 60%), 38.0% bonds (strategic “neutral”: 38%) and 1.0% in cash (Exhibit 9).",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 16,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 9: Recommended asset mix",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "RBC GAM Investment Strategy Committee",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/086a07d5031e3d459b7468189ad2fb13",
+                            "alt": "Exhibit 9 Recommended asset mix",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Note: As of June 3, 2025. Source: RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "description": null,
+    "profiles": {
+        "name": null,
+        "picture": null,
+        "title": null
+    }
+}
