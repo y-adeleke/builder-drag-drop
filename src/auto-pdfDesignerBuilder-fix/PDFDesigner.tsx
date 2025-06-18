@@ -298,208 +298,157 @@ export const PDFDesigner: React.FC = () => {
    * Renders pages following the new rules
    */
   const renderPagesWithNewLogic = async (container: HTMLElement, article: ExtractedArticle, theme: Theme, showProfile: boolean) => {
-    // 1. Clear container and set base styles
-    container.innerHTML = "";
-    container.className = `pdf-container ${theme.fontFamily} ${theme.backgroundColor}`;
+    const measureHeight = createHeightMeasurer(container);
+    const pages: HTMLElement[] = [];
 
-    let pageContentArea: HTMLElement | null = null;
-    let currentSectionWrapper: HTMLElement | null = null;
+    console.log(`Starting with ${article.sections.length} sections`);
 
-    // 2. Function to create a new page
-    const createNewPage = (isFirstPage: boolean = false): HTMLElement => {
-      const page = document.createElement("div");
-      page.className = "pdf-page";
-      container.appendChild(page);
+    // === PAGE 1: Cover + Profile + Content Start ===
+    const firstPage = document.createElement("div");
+    firstPage.className = "pdf-page";
 
-      let contentArea: HTMLElement;
-      const contentHeight = isFirstPage ? A4_HEIGHT - COVER_HEIGHT - PAGE_PADDING * 2 : A4_HEIGHT - PAGE_PADDING * 2;
+    // Add cover
+    const coverContainer = document.createElement("div");
+    coverContainer.style.width = "100%";
+    coverContainer.style.height = `${COVER_HEIGHT}px`;
+    coverContainer.style.position = "relative";
+    coverContainer.innerHTML = renderToString(React.createElement(CoverDesign, { article, coverHeight: COVER_HEIGHT }));
+    firstPage.appendChild(coverContainer);
 
-      if (isFirstPage) {
-        const coverContainer = document.createElement("div");
-        coverContainer.style.height = `${COVER_HEIGHT}px`;
-        coverContainer.innerHTML = renderToString(React.createElement(CoverDesign, { article, coverHeight: COVER_HEIGHT }));
-        page.appendChild(coverContainer);
+    // Remaining space below cover
+    const remainingSpace = document.createElement("div");
+    remainingSpace.style.width = "100%";
+    remainingSpace.style.height = `${A4_HEIGHT - COVER_HEIGHT}px`;
+    remainingSpace.style.display = "flex";
 
-        const remainingSpace = document.createElement("div");
-        remainingSpace.style.display = "flex";
-        remainingSpace.style.height = `${A4_HEIGHT - COVER_HEIGHT}px`;
-        page.appendChild(remainingSpace);
+    if (showProfile && article) {
+      // Profile sidebar (150px)
+      const profileSidebar = document.createElement("div");
+      profileSidebar.className = "profile-sidebar";
+      profileSidebar.style.width = `${PROFILE_WIDTH}px`;
+      profileSidebar.style.height = "100%";
+      profileSidebar.style.padding = "16px 8px";
+      profileSidebar.innerHTML = renderToString(
+        React.createElement(ProfileDesign, {
+          article,
+          width: PROFILE_WIDTH,
+        })
+      );
+      remainingSpace.appendChild(profileSidebar);
+    }
 
-        if (showProfile) {
-          const profileSidebar = document.createElement("div");
-          profileSidebar.className = "profile-sidebar";
-          profileSidebar.style.width = `${PROFILE_WIDTH}px`;
-          profileSidebar.innerHTML = renderToString(React.createElement(ProfileDesign, { article, width: PROFILE_WIDTH }));
-          remainingSpace.appendChild(profileSidebar);
-        }
-        contentArea = document.createElement("div");
-        contentArea.className = "pdf-content-area";
-        contentArea.style.height = `${contentHeight}px`;
-        remainingSpace.appendChild(contentArea);
-      } else {
-        // For subsequent pages, we need to handle the profile sidebar if it's shown
-        const remainingSpace = document.createElement("div");
-        remainingSpace.style.display = "flex";
-        remainingSpace.style.height = `${A4_HEIGHT}px`; // Full page height
-        page.appendChild(remainingSpace);
+    // Content area
+    const firstPageContent = document.createElement("div");
+    firstPageContent.className = "pdf-content-area";
+    firstPageContent.style.flex = "1";
+    firstPageContent.style.padding = "16px";
+    firstPageContent.style.boxSizing = "border-box";
+    remainingSpace.appendChild(firstPageContent);
 
-        if (showProfile) {
-          // Add a placeholder for the profile sidebar to maintain layout
-          const profileSidebarPlaceholder = document.createElement("div");
-          profileSidebarPlaceholder.style.width = `${PROFILE_WIDTH}px`;
-          profileSidebarPlaceholder.style.flexShrink = "0";
-          remainingSpace.appendChild(profileSidebarPlaceholder);
-        }
+    firstPage.appendChild(remainingSpace);
 
-        contentArea = document.createElement("div");
-        contentArea.className = "pdf-content-area";
-        contentArea.style.height = `${contentHeight}px`;
-        remainingSpace.appendChild(contentArea);
-      }
-      pageContentArea = contentArea;
-      return contentArea;
-    };
+    // Calculate available height for first page content
+    let availableHeight = A4_HEIGHT - COVER_HEIGHT - PAGE_PADDING * 2;
+    let currentPage = firstPage;
+    let currentContentArea = firstPageContent;
 
-    // 3. Start with the first page
-    pageContentArea = createNewPage(true);
+    // Process sections
+    for (let sectionIndex = 0; sectionIndex < article.sections.length; sectionIndex++) {
+      const section = article.sections[sectionIndex];
 
-    // 4. Create a flat list of all blocks with their section context
-    let allBlocks = article.sections.flatMap((section, sectionIndex) => {
+      // Determine if section should use 2-column layout
       const use2Column = shouldSectionUse2Column(section);
-      const sectionBlocks: { block: ContentBlock; use2Column: boolean; sectionIndex: number; sectionId: string }[] = [];
-      const sectionId = `section-${sectionIndex}`;
 
-      if (section.heading) {
-        sectionBlocks.push({ block: section.heading, use2Column, sectionIndex, sectionId });
+      // Render section content
+      const sectionHtml = renderSectionContent(section, theme, use2Column);
+      const sectionHeight = measureHeight(sectionHtml, use2Column);
+
+      console.log(`Section ${sectionIndex}: height=${sectionHeight}px, available=${availableHeight}px, 2-col=${use2Column}`);
+
+      // Check if we need a new page (content doesn't fit)
+      const needsNewPage = sectionHeight > availableHeight;
+
+      if (needsNewPage) {
+        // Add current page to the pages array before creating a new one
+        pages.push(currentPage);
+
+        // Create new page
+        currentPage = document.createElement("div");
+        currentPage.className = "pdf-page";
+        currentPage.style.padding = "16px";
+        currentPage.style.boxSizing = "border-box";
+
+        currentContentArea = currentPage;
+        availableHeight = A4_HEIGHT - PAGE_PADDING * 2;
+
+        console.log(`New page created for section ${sectionIndex}, available height: ${availableHeight}px`);
       }
-      section.content.forEach((block) => {
-        sectionBlocks.push({ block, use2Column, sectionIndex, sectionId });
-      });
-      if (section.subsections) {
-        section.subsections.forEach((subsection) => {
-          if (subsection.heading) {
-            sectionBlocks.push({ block: subsection.heading, use2Column, sectionIndex, sectionId });
-          }
-          subsection.content.forEach((block) => {
-            sectionBlocks.push({ block, use2Column, sectionIndex, sectionId });
-          });
-        });
+
+      // Check if section is still too tall for even a new page
+      const maxPageContentHeight = A4_HEIGHT - PAGE_PADDING * 2;
+      if (sectionHeight > maxPageContentHeight) {
+        console.warn(`Section ${sectionIndex} is too tall (${sectionHeight}px) for a single page (${maxPageContentHeight}px available). Content may be clipped.`);
+        // For now, we'll still add it but with a warning
+        // TODO: Implement content splitting for very large sections
       }
-      return sectionBlocks;
+
+      // Add section to current page
+      const sectionElement = document.createElement("div");
+      sectionElement.className = `section ${use2Column ? "two-column-section" : "single-column-section"}`;
+      sectionElement.style.marginBottom = "24px";
+
+      // Explicitly set 2-column styles to ensure they apply
+      if (use2Column) {
+        sectionElement.style.columnCount = "2";
+        sectionElement.style.columnGap = "1.5rem";
+        sectionElement.style.textAlign = "justify";
+        sectionElement.style.columnFill = "balance";
+        console.log(`Applied 2-column styles to section ${sectionIndex}`);
+      }
+
+      sectionElement.innerHTML = sectionHtml;
+      currentContentArea.appendChild(sectionElement);
+
+      console.log(`Section ${sectionIndex} added to page. Content area children: ${currentContentArea.children.length}`);
+
+      // Update available height
+      availableHeight = Math.max(0, availableHeight - sectionHeight - 24); // 24px for margin
+      console.log(`Section ${sectionIndex} added, remaining height: ${availableHeight}px`);
+    }
+
+    // Add the final page (always add the current page at the end)
+    pages.push(currentPage);
+
+    console.log(`Total pages: ${pages.length}`);
+
+    // Clear container and add pages sequentially
+    container.innerHTML = "";
+
+    // Apply theme classes and container styling
+    container.className = `pdf-container ${theme.fontFamily} ${theme.backgroundColor}`;
+    container.style.display = "block";
+    container.style.width = "100%";
+    container.style.overflow = "visible";
+
+    pages.forEach((page, index) => {
+      console.log(`Adding page ${index + 1} to container, has ${page.children.length} children`);
+
+      // Ensure proper page styling for sequential layout
+      page.className = "pdf-page";
+      page.style.position = "relative"; // Not absolute!
+      page.style.display = "block";
+      page.style.width = "794px";
+      page.style.height = "1122px";
+      page.style.margin = "0 auto 24px auto";
+      page.style.backgroundColor = "white";
+      page.style.border = "2px solid #999";
+      page.style.boxSizing = "border-box";
+      page.style.clear = "both";
+
+      container.appendChild(page);
     });
 
-    let lastSectionId = "";
-
-    // 5. Iterate through the flat list of blocks using an index
-    for (let i = 0; i < allBlocks.length; i++) {
-      const { block, use2Column, sectionId } = allBlocks[i];
-
-      if (!pageContentArea) continue;
-
-      // If it's a new section, create a new section wrapper
-      if (sectionId !== lastSectionId) {
-        currentSectionWrapper = document.createElement("div");
-        currentSectionWrapper.className = `section ${use2Column ? "two-column-section" : "single-column-section"}`;
-        pageContentArea.appendChild(currentSectionWrapper);
-        lastSectionId = sectionId;
-      }
-
-      if (!currentSectionWrapper) continue;
-
-      const blockHtml = renderToString(React.createElement(SectionRenderer, { block, theme }));
-      const blockElement = document.createElement("div");
-      const isBreakable = use2Column && (block.type === "paragraph" || block.type === "list");
-      if (!isBreakable) {
-        blockElement.className = "block-wrapper";
-      }
-      blockElement.innerHTML = blockHtml;
-
-      currentSectionWrapper.appendChild(blockElement);
-
-      // Check for overflow
-      if (pageContentArea.scrollHeight > pageContentArea.clientHeight + 2) {
-        // Add a 2px buffer
-        // A. Remove the block that caused overflow
-        currentSectionWrapper.removeChild(blockElement);
-
-        // B. If the section wrapper is now empty, it can be removed.
-        if (currentSectionWrapper.children.length === 0) {
-          pageContentArea.removeChild(currentSectionWrapper);
-        }
-
-        // C. Create a new page
-        pageContentArea = createNewPage();
-
-        // D. Create a new section wrapper on the new page to continue the section
-        currentSectionWrapper = document.createElement("div");
-        currentSectionWrapper.className = `section ${use2Column ? "two-column-section" : "single-column-section"}`;
-        pageContentArea.appendChild(currentSectionWrapper);
-        lastSectionId = sectionId; // Continue the same section
-
-        // E. Re-add the block to the new section on the new page
-        currentSectionWrapper.appendChild(blockElement);
-
-        // F. Check if the block *itself* is too big for a page
-        if (pageContentArea.scrollHeight > pageContentArea.clientHeight + 2) {
-          console.warn("Content block is taller than a single page and may be clipped or split.", block);
-
-          // G. Attempt to split the block if it's a paragraph
-          if (block.type === "paragraph" && block.text && block.text.length > 100) {
-            // Only split longer text
-            currentSectionWrapper.removeChild(blockElement); // Remove the oversized block
-
-            const words = block.text.split(" ");
-            let part1 = "";
-
-            const tempP = document.createElement("p");
-            // Copy styles from rendered block to get accurate measurement
-            const renderedP = blockElement.querySelector("p");
-            if (renderedP) {
-              tempP.style.cssText = renderedP.style.cssText;
-              tempP.className = renderedP.className;
-            }
-
-            const tempWrapper = document.createElement("div");
-            if (!isBreakable) tempWrapper.className = "block-wrapper";
-            tempWrapper.appendChild(tempP);
-            currentSectionWrapper.appendChild(tempWrapper);
-
-            // Find the split point by adding words until it overflows
-            for (let j = 0; j < words.length; j++) {
-              const currentText = part1 + words[j] + " ";
-              tempP.textContent = currentText;
-              if (pageContentArea.scrollHeight > pageContentArea.clientHeight + 2) {
-                // The last word caused overflow.
-                break;
-              }
-              part1 = currentText;
-            }
-
-            currentSectionWrapper.removeChild(tempWrapper); // Clean up temp element
-
-            const part2 = block.text.substring(part1.length);
-
-            // Insert the part that fits
-            if (part1.trim()) {
-              const part1Block: ContentBlock = { ...block, text: part1 };
-              const part1Element = document.createElement("div");
-              if (!isBreakable) part1Element.className = "block-wrapper";
-              part1Element.innerHTML = renderToString(React.createElement(SectionRenderer, { block: part1Block, theme }));
-              currentSectionWrapper.appendChild(part1Element);
-            }
-
-            // Add the remainder to be processed in the next iteration
-            if (part2.trim()) {
-              const remainderBlock: ContentBlock = { ...block, text: part2 };
-              allBlocks.splice(i + 1, 0, { ...allBlocks[i], block: remainderBlock });
-            }
-
-            // We've handled this block, so we can continue the loop
-            continue;
-          }
-        }
-      }
-    }
+    console.log(`Container now has ${container.children.length} pages`);
   };
 
   /**
