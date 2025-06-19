@@ -1,0 +1,115 @@
+/* PDF Layout Fixes - Aligned with PlacementEngine */
+
+/* PDF Container */
+.pdf-container {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+/* Basic page structure */
+.pdf-page {
+  box-sizing: border-box;
+  background: white;
+  overflow: hidden; /* Contain content within the page boundaries */
+  page-break-after: always;
+  break-after: page;
+  display: flex;
+  flex-direction: column;
+  width: 794px;
+  height: 1122px;
+  margin: 0 auto 24px auto; /* Spacing for preview */
+  position: relative;
+  border: 1px solid #ccc; /* Debugging border */
+}
+
+/* Wrapper for the main content area (profile + content) */
+.content-wrapper {
+  display: flex;
+  flex-grow: 1;
+  height: 100%;
+  width: 100%;
+}
+
+/* Profile Sidebar */
+.profile-sidebar {
+  width: 150px;
+  flex-shrink: 0;
+  padding: 20px 15px;
+  background-color: #f0f4f8;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Area holding spanning elements and columns */
+.pdf-content-area {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden; /* Crucial for layout calculations */
+}
+
+/* Ensure all text, including captions and list items, is left-aligned */
+.pdf-content-area p,
+.pdf-content-area li,
+.pdf-content-area .caption,
+.pdf-content-area h1,
+.pdf-content-area h2,
+.pdf-content-area h3 {
+  text-align: left;
+}
+
+/* Remove default list indentation */
+.pdf-content-area ul,
+.pdf-content-area ol {
+  padding-left: 0;
+  margin-left: 0;
+  list-style-position: inside; /* Brings bullets/numbers inside the text block */
+}
+
+.pdf-content-area li {
+  padding-left: 0; /* Remove any extra padding on list items */
+}
+
+/* Wrapper for elements that span all columns */
+.spanning-wrapper {
+  width: 100%;
+}
+
+/* Wrapper for the columns */
+.columns-wrapper {
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+  gap: 16px; /* Space between columns */
+}
+
+/* Individual column */
+.column {
+  height: 100%;
+  overflow: hidden; /* Hide any minor overflow */
+}
+
+/* Generic wrapper for blocks that should not break */
+.block-wrapper,
+.atomic-block {
+  display: block;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Spacing for main headings that span columns */
+.main-heading-span {
+  padding-bottom: 1rem;
+}
+
+/* Default paragraph styling */
+.pdf-section.paragraph p {
+  margin-bottom: 0.75rem;
+  overflow-wrap: break-word;
+  orphans: 2;
+  widows: 2;
+}
