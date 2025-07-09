@@ -1,8 +1,14 @@
-// PDFDesigner.tsx
 import React, { useLayoutEffect, useRef, useState } from "react";
 import html2pdf from "html2pdf.js";
 import { renderToString } from "react-dom/server";
-import { ExtractedArticle, ContentBlock, Theme, PageConfig, VPage } from "./types";
+import {
+  ExtractedArticle,
+  ContentBlock,
+  Theme,
+  PageConfig,
+  VPage,
+  VColumn,
+} from "./types";
 import { themes, defaultTheme } from "./themes";
 import { ThemeSelector } from "./themes/ThemeSelector";
 import { ArticleExtractor } from "./components/ArticleExtractor";
@@ -10,18 +16,17 @@ import { SectionRenderer } from "./components/SectionRenderer";
 import { CoverDesign } from "./components/CoverDesign";
 import { ProfileDesign } from "./components/ProfileDesign";
 
-// Import CSS files
+import "./index.css";
 import "./cover-design.css";
 import "./html-profile.css";
 import "./pdf-layout-fixes.css";
 
-// Layout constants
+// Page dimensions & layout constants
 const A4_HEIGHT = 1122;
 const A4_WIDTH = 794;
 const COVER_HEIGHT = 420;
-const PROFILE_WIDTH = 150;
+const PROFILE_WIDTH = 190;
 const PAGE_PADDING = 16;
-const CONTENT_WIDTH = A4_WIDTH - PROFILE_WIDTH - PAGE_PADDING * 3; // Remaining width for content
 
 const DEFAULT_CONFIG: PageConfig = {
   pageHeight: A4_HEIGHT,
@@ -36,6 +41,47 @@ const DEFAULT_CONFIG: PageConfig = {
   sectionThreshold: 150,
 };
 
+// Utility to measure rendered HTML height offscreen
+function createHeightMeasurer(container: HTMLElement) {
+  return (html: string, width: number, is2Column: boolean = false): number => {
+    const probe = document.createElement("div");
+    probe.className = "absolute invisible pointer-events-none";
+    probe.style.width = `${width}px`;
+    probe.style.position = "absolute";
+    probe.style.left = "-9999px";
+    probe.style.top = "-9999px";
+    if (is2Column) {
+      probe.style.columnCount = "2";
+      probe.style.columnGap = "1.5rem";
+      probe.style.columnFill = "balance";
+    }
+    probe.innerHTML = html;
+    container.appendChild(probe);
+    const height = Math.ceil(probe.getBoundingClientRect().height) + 8;
+    container.removeChild(probe);
+    return height;
+  };
+}
+
+// Placeholder for large-image detection
+function isLargeImage(src: string): boolean {
+  return false;
+}
+
+// Decide 2-column based on total paragraph char count
+function shouldSectionUse2Column(section: any): boolean {
+  const paras = section.content
+    .filter((b: any) => b.type === "paragraph")
+    .map((b: any) => b.text || "");
+  (section.subsections || []).forEach((ss: any) => {
+    ss.content
+      .filter((b: any) => b.type === "paragraph")
+      .forEach((b: any) => paras.push(b.text || ""));
+  });
+  const total = paras.reduce((sum, t) => sum + t.length, 0);
+  return total > 700;
+}
+
 export const PDFDesigner: React.FC = () => {
   const rootRef = useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState<Theme>(defaultTheme);
@@ -43,568 +89,503 @@ export const PDFDesigner: React.FC = () => {
   const [showProfile, setShowProfile] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  /**
-   * Utility function to preload images for better rendering
-   */
-  const preloadImages = async (imageUrls: string[]): Promise<void> => {
-    const loadPromises = imageUrls.map(
-      (url) =>
-        new Promise<void>((resolve) => {
-          const img = new Image();
-          img.onload = img.onerror = () => resolve();
-          img.src = url;
-        })
+  // Preload images for accurate measurement
+  const preloadImages = async (urls: string[]) => {
+    await Promise.all(
+      urls.map(
+        (url) =>
+          new Promise<void>((res) => {
+            const img = new Image();
+            img.onload = img.onerror = () => res();
+            img.src = url;
+          })
+      )
     );
-
-    await Promise.all(loadPromises);
   };
 
-  /**
-   * Factory function to create height measurement probe
-   */
-  const createHeightMeasurer = (container: HTMLElement) => {
-    return (html: string, is2Column: boolean = false): number => {
-      const probe = document.createElement("div");
-      probe.className = "absolute invisible pointer-events-none";
-      probe.style.width = `${A4_WIDTH - PAGE_PADDING * 2}px`;
-      probe.style.position = "absolute";
-      probe.style.left = "-9999px";
-      probe.style.top = "-9999px";
-      probe.style.visibility = "hidden";
-
-      // Apply 2-column layout if needed for accurate height measurement
-      if (is2Column) {
-        probe.style.columnCount = "2";
-        probe.style.columnGap = "1.5rem";
-        probe.style.columnFill = "balance";
-      }
-
-      probe.innerHTML = html;
-
-      container.appendChild(probe);
-      const height = probe.getBoundingClientRect().height;
-      container.removeChild(probe);
-
-      // Add some padding to the height calculation for better accuracy
-      const measuredHeight = Math.ceil(height) + 8;
-
-      console.log(`Height measurement: ${is2Column ? "2-col" : "1-col"} = ${measuredHeight}px`);
-      return measuredHeight;
-    };
-  };
-
-  /**
-   * Checks if an image should be treated as a large image based on filename
-   */
-  const isLargeImage = (src: string): boolean => {
-    return /(large|_xl|big|banner|hero)\.(jpg|png|jpeg)/i.test(src);
-  };
-
-  /**
-   * Determines if a section should use 2-column layout based on text content
-   */
-  const shouldSectionUse2Column = (section: any): boolean => {
-    // Check all text blocks in the section
-    const allTextBlocks = [...section.content];
-
-    // Add subsection content if it exists
-    if (section.subsections) {
-      section.subsections.forEach((subsection: any) => {
-        allTextBlocks.push(...subsection.content);
-      });
-    }
-
-    // Find text elements and calculate total character count
-    const textElements = allTextBlocks.filter((block) => block.type === "paragraph");
-    const totalTextLength = textElements.reduce((sum, block) => sum + (block.text?.length || 0), 0);
-
-    console.log(`Section text analysis: ${textElements.length} paragraphs, ${totalTextLength} chars, 2-col=${totalTextLength > 700}`);
-    return totalTextLength > 700;
-  };
-
-  /**
-   * Renders a complete section with all its content
-   */
-  const renderSectionContent = (section: any, theme: Theme, use2Column: boolean = false): string => {
-    let sectionHtml = "";
-
-    // Add section heading if it exists
-    if (section.heading) {
-      if (use2Column) {
-        // For 2-column, render heading without wrapper div
-        const HeadingTag = section.heading.level === 1 ? "h1" : section.heading.level === 3 ? "h3" : "h2";
-        sectionHtml += `<${HeadingTag} class="font-bold text-xl ${theme.accentColor} leading-tight break-inside-avoid" style="font-family: ${theme.fontFamily}; margin-bottom: 1rem; margin-top: 0;">${section.heading.text}</${HeadingTag}>`;
-      } else {
-        sectionHtml += renderToString(React.createElement(SectionRenderer, { block: section.heading, theme }));
-      }
-    }
-
-    // Add section content
-    section.content.forEach((block: ContentBlock) => {
-      if (block.type === "image" && isLargeImage(block.src || "")) {
-        sectionHtml += `<div class="single-column-image">${renderToString(React.createElement(SectionRenderer, { block, theme }))}</div>`;
-      } else if (use2Column && block.type === "paragraph") {
-        // For 2-column, render paragraphs without wrapper divs
-        // Split long paragraphs to test column flow
-        const text = block.text || "";
-        if (text.length > 500) {
-          const midPoint = Math.floor(text.length / 2);
-          const splitPoint = text.indexOf(" ", midPoint);
-          const firstHalf = text.substring(0, splitPoint !== -1 ? splitPoint : midPoint);
-          const secondHalf = text.substring(splitPoint !== -1 ? splitPoint + 1 : midPoint);
-
-          sectionHtml += `<p class="${theme.textColor} leading-relaxed text-content" style="font-family: ${theme.fontFamily}; margin-bottom: 0.75rem; orphans: 2; widows: 2;">${firstHalf}</p>`;
-          sectionHtml += `<p class="${theme.textColor} leading-relaxed text-content" style="font-family: ${theme.fontFamily}; margin-bottom: 0.75rem; orphans: 2; widows: 2;">${secondHalf}</p>`;
-        } else {
-          sectionHtml += `<p class="${theme.textColor} leading-relaxed text-content" style="font-family: ${theme.fontFamily}; margin-bottom: 0.75rem; orphans: 2; widows: 2;">${text}</p>`;
-        }
-      } else {
-        sectionHtml += renderToString(React.createElement(SectionRenderer, { block, theme }));
-      }
-    });
-
-    // Add subsection content
-    if (section.subsections) {
-      section.subsections.forEach((subsection: any) => {
-        if (subsection.heading) {
-          if (use2Column) {
-            // For 2-column, render heading without wrapper div
-            const HeadingTag = subsection.heading.level === 1 ? "h1" : subsection.heading.level === 3 ? "h3" : "h2";
-            sectionHtml += `<${HeadingTag} class="font-bold text-lg ${theme.accentColor} leading-tight break-inside-avoid" style="font-family: ${theme.fontFamily}; margin-bottom: 0.75rem; margin-top: 1rem;">${subsection.heading.text}</${HeadingTag}>`;
-          } else {
-            sectionHtml += renderToString(React.createElement(SectionRenderer, { block: subsection.heading, theme }));
-          }
-        }
-        subsection.content.forEach((block: ContentBlock) => {
-          if (block.type === "image" && isLargeImage(block.src || "")) {
-            sectionHtml += `<div class="single-column-image">${renderToString(React.createElement(SectionRenderer, { block, theme }))}</div>`;
-          } else if (use2Column && block.type === "paragraph") {
-            // For 2-column, render paragraphs without wrapper divs
-            // Split long paragraphs to test column flow
-            const text = block.text || "";
-            if (text.length > 500) {
-              const midPoint = Math.floor(text.length / 2);
-              const splitPoint = text.indexOf(" ", midPoint);
-              const firstHalf = text.substring(0, splitPoint !== -1 ? splitPoint : midPoint);
-              const secondHalf = text.substring(splitPoint !== -1 ? splitPoint + 1 : midPoint);
-
-              sectionHtml += `<p class="${theme.textColor} leading-relaxed text-content" style="font-family: ${theme.fontFamily}; margin-bottom: 0.75rem; orphans: 2; widows: 2;">${firstHalf}</p>`;
-              sectionHtml += `<p class="${theme.textColor} leading-relaxed text-content" style="font-family: ${theme.fontFamily}; margin-bottom: 0.75rem; orphans: 2; widows: 2;">${secondHalf}</p>`;
-            } else {
-              sectionHtml += `<p class="${theme.textColor} leading-relaxed text-content" style="font-family: ${theme.fontFamily}; margin-bottom: 0.75rem; orphans: 2; widows: 2;">${text}</p>`;
-            }
-          } else {
-            sectionHtml += renderToString(React.createElement(SectionRenderer, { block, theme }));
-          }
-        });
-      });
-    }
-
-    return sectionHtml;
-  };
-
-  /**
-   * Prepares article data by ensuring required fields have fallback values
-   */
-  const prepareArticleData = (article: ExtractedArticle): ExtractedArticle => {
-    // Generate a title from the first heading if title is missing
-    let title = article.title;
-    if (!title || title.trim() === "") {
-      // Look for the first heading in the sections
-      for (const section of article.sections) {
-        if (section.heading && section.heading.text) {
-          title = section.heading.text;
+  // Ensure article has title, description, date
+  const prepareArticleData = (a: ExtractedArticle): ExtractedArticle => {
+    let title = a.title?.trim();
+    if (!title) {
+      for (const s of a.sections) {
+        if (s.heading?.text) {
+          title = s.heading.text;
           break;
         }
-        // Check content for headings
-        for (const content of section.content) {
-          if (content.type === "heading" && content.text) {
-            title = content.text;
-            break;
-          }
-        }
-        if (title) break;
-      }
-      // Final fallback
-      if (!title) {
-        title = "Economic Report";
       }
     }
-
     return {
-      ...article,
-      title: title.trim(),
-      description: article.description || "",
-      date: article.date || new Date().toLocaleDateString(),
+      ...a,
+      title: title || "Untitled Document",
+      description: a.description || "",
+      date: a.date || new Date().toLocaleDateString(),
     };
   };
 
-  /**
-   * Main layout effect that renders the PDF when article or theme changes
-   */
   useLayoutEffect(() => {
     const container = rootRef.current;
     if (!container || !article) return;
 
-    const renderDocument = async () => {
-      try {
-        setIsGenerating(true);
-        container.innerHTML = "";
+    (async () => {
+      setIsGenerating(true);
+      container.innerHTML = "";
 
-        // Prepare article data with fallbacks
-        const preparedArticle = prepareArticleData(article);
-
-        // Preload images
-        const imageUrls: string[] = [];
-        preparedArticle.sections.forEach((section) => {
-          section.content.forEach((block) => {
-            if (block.type === "image" && block.src) {
-              imageUrls.push(block.src);
-            }
-          });
-          if (section.subsections) {
-            section.subsections.forEach((subsection) => {
-              subsection.content.forEach((block) => {
-                if (block.type === "image" && block.src) {
-                  imageUrls.push(block.src);
-                }
-              });
-            });
-          }
+      const art = prepareArticleData(article);
+      const imgs: string[] = [];
+      art.sections.forEach((s) => {
+        s.content.forEach((b: ContentBlock) => {
+          if (b.type === "image" && b.src) imgs.push(b.src);
         });
+        (s.subsections || []).forEach((ss: any) =>
+          ss.content.forEach((b: ContentBlock) => {
+            if (b.type === "image" && b.src) imgs.push(b.src);
+          })
+        );
+      });
+      if (imgs.length) await preloadImages(imgs);
+      if ((document as any).fonts) await (document as any).fonts.ready;
 
-        if (imageUrls.length > 0) {
-          await preloadImages(imageUrls);
-        }
-
-        // Wait for fonts to load
-        if ("fonts" in document) {
-          await (document as any).fonts.ready;
-        }
-
-        // Render pages with new logic
-        await renderPagesWithNewLogic(container, preparedArticle, theme, showProfile);
-      } catch (error) {
-        console.error("Error rendering document:", error);
-      } finally {
-        setIsGenerating(false);
-      }
-    };
-
-    renderDocument();
+      const engine = new PlacementEngine(
+        DEFAULT_CONFIG,
+        theme,
+        showProfile,
+        container
+      );
+      const pages = await engine.generateLayout(art);
+      engine.renderToDOM(container, pages);
+      setIsGenerating(false);
+    })();
   }, [article, theme, showProfile]);
 
-  /**
-   * Renders pages following the new rules
-   */
-  const renderPagesWithNewLogic = async (container: HTMLElement, article: ExtractedArticle, theme: Theme, showProfile: boolean) => {
-    // 1. Clear container and set base styles
-    container.innerHTML = "";
-    container.className = `pdf-container ${theme.fontFamily} ${theme.backgroundColor}`;
-
-    let pageContentArea: HTMLElement | null = null;
-    let currentSectionWrapper: HTMLElement | null = null;
-
-    // 2. Function to create a new page
-    const createNewPage = (isFirstPage: boolean = false): HTMLElement => {
-      const page = document.createElement("div");
-      page.className = "pdf-page";
-      container.appendChild(page);
-
-      let contentArea: HTMLElement;
-      const contentHeight = isFirstPage ? A4_HEIGHT - COVER_HEIGHT - PAGE_PADDING * 2 : A4_HEIGHT - PAGE_PADDING * 2;
-
-      if (isFirstPage) {
-        const coverContainer = document.createElement("div");
-        coverContainer.style.height = `${COVER_HEIGHT}px`;
-        coverContainer.innerHTML = renderToString(React.createElement(CoverDesign, { article, coverHeight: COVER_HEIGHT }));
-        page.appendChild(coverContainer);
-
-        const remainingSpace = document.createElement("div");
-        remainingSpace.style.display = "flex";
-        remainingSpace.style.height = `${A4_HEIGHT - COVER_HEIGHT}px`;
-        page.appendChild(remainingSpace);
-
-        if (showProfile) {
-          const profileSidebar = document.createElement("div");
-          profileSidebar.className = "profile-sidebar";
-          profileSidebar.style.width = `${PROFILE_WIDTH}px`;
-          profileSidebar.innerHTML = renderToString(React.createElement(ProfileDesign, { article, width: PROFILE_WIDTH }));
-          remainingSpace.appendChild(profileSidebar);
-        }
-        contentArea = document.createElement("div");
-        contentArea.className = "pdf-content-area";
-        contentArea.style.height = `${contentHeight}px`;
-        remainingSpace.appendChild(contentArea);
-      } else {
-        // For subsequent pages, we need to handle the profile sidebar if it's shown
-        const remainingSpace = document.createElement("div");
-        remainingSpace.style.display = "flex";
-        remainingSpace.style.height = `${A4_HEIGHT}px`; // Full page height
-        page.appendChild(remainingSpace);
-
-        if (showProfile) {
-          // Add a placeholder for the profile sidebar to maintain layout
-          const profileSidebarPlaceholder = document.createElement("div");
-          profileSidebarPlaceholder.style.width = `${PROFILE_WIDTH}px`;
-          profileSidebarPlaceholder.style.flexShrink = "0";
-          remainingSpace.appendChild(profileSidebarPlaceholder);
-        }
-
-        contentArea = document.createElement("div");
-        contentArea.className = "pdf-content-area";
-        contentArea.style.height = `${contentHeight}px`;
-        remainingSpace.appendChild(contentArea);
-      }
-      pageContentArea = contentArea;
-      return contentArea;
-    };
-
-    // 3. Start with the first page
-    pageContentArea = createNewPage(true);
-
-    // 4. Create a flat list of all blocks with their section context
-    let allBlocks = article.sections.flatMap((section, sectionIndex) => {
-      const use2Column = shouldSectionUse2Column(section);
-      const sectionBlocks: { block: ContentBlock; use2Column: boolean; sectionIndex: number; sectionId: string }[] = [];
-      const sectionId = `section-${sectionIndex}`;
-
-      if (section.heading) {
-        sectionBlocks.push({ block: section.heading, use2Column, sectionIndex, sectionId });
-      }
-      section.content.forEach((block) => {
-        sectionBlocks.push({ block, use2Column, sectionIndex, sectionId });
-      });
-      if (section.subsections) {
-        section.subsections.forEach((subsection) => {
-          if (subsection.heading) {
-            sectionBlocks.push({ block: subsection.heading, use2Column, sectionIndex, sectionId });
-          }
-          subsection.content.forEach((block) => {
-            sectionBlocks.push({ block, use2Column, sectionIndex, sectionId });
-          });
-        });
-      }
-      return sectionBlocks;
-    });
-
-    let lastSectionId = "";
-
-    // 5. Iterate through the flat list of blocks using an index
-    for (let i = 0; i < allBlocks.length; i++) {
-      const { block, use2Column, sectionId } = allBlocks[i];
-
-      if (!pageContentArea) continue;
-
-      // If it's a new section, create a new section wrapper
-      if (sectionId !== lastSectionId) {
-        currentSectionWrapper = document.createElement("div");
-        currentSectionWrapper.className = `section ${use2Column ? "two-column-section" : "single-column-section"}`;
-        pageContentArea.appendChild(currentSectionWrapper);
-        lastSectionId = sectionId;
-      }
-
-      if (!currentSectionWrapper) continue;
-
-      const blockHtml = renderToString(React.createElement(SectionRenderer, { block, theme }));
-      const blockElement = document.createElement("div");
-      const isBreakable = use2Column && (block.type === "paragraph" || block.type === "list");
-      if (!isBreakable) {
-        blockElement.className = "block-wrapper";
-      }
-      blockElement.innerHTML = blockHtml;
-
-      currentSectionWrapper.appendChild(blockElement);
-
-      // Check for overflow
-      if (pageContentArea.scrollHeight > pageContentArea.clientHeight + 2) {
-        // Add a 2px buffer
-        // A. Remove the block that caused overflow
-        currentSectionWrapper.removeChild(blockElement);
-
-        // B. If the section wrapper is now empty, it can be removed.
-        if (currentSectionWrapper.children.length === 0) {
-          pageContentArea.removeChild(currentSectionWrapper);
-        }
-
-        // C. Create a new page
-        pageContentArea = createNewPage();
-
-        // D. Create a new section wrapper on the new page to continue the section
-        currentSectionWrapper = document.createElement("div");
-        currentSectionWrapper.className = `section ${use2Column ? "two-column-section" : "single-column-section"}`;
-        pageContentArea.appendChild(currentSectionWrapper);
-        lastSectionId = sectionId; // Continue the same section
-
-        // E. Re-add the block to the new section on the new page
-        currentSectionWrapper.appendChild(blockElement);
-
-        // F. Check if the block *itself* is too big for a page
-        if (pageContentArea.scrollHeight > pageContentArea.clientHeight + 2) {
-          console.warn("Content block is taller than a single page and may be clipped or split.", block);
-
-          // G. Attempt to split the block if it's a paragraph
-          if (block.type === "paragraph" && block.text && block.text.length > 100) {
-            // Only split longer text
-            currentSectionWrapper.removeChild(blockElement); // Remove the oversized block
-
-            const words = block.text.split(" ");
-            let part1 = "";
-
-            const tempP = document.createElement("p");
-            // Copy styles from rendered block to get accurate measurement
-            const renderedP = blockElement.querySelector("p");
-            if (renderedP) {
-              tempP.style.cssText = renderedP.style.cssText;
-              tempP.className = renderedP.className;
-            }
-
-            const tempWrapper = document.createElement("div");
-            if (!isBreakable) tempWrapper.className = "block-wrapper";
-            tempWrapper.appendChild(tempP);
-            currentSectionWrapper.appendChild(tempWrapper);
-
-            // Find the split point by adding words until it overflows
-            for (let j = 0; j < words.length; j++) {
-              const currentText = part1 + words[j] + " ";
-              tempP.textContent = currentText;
-              if (pageContentArea.scrollHeight > pageContentArea.clientHeight + 2) {
-                // The last word caused overflow.
-                break;
-              }
-              part1 = currentText;
-            }
-
-            currentSectionWrapper.removeChild(tempWrapper); // Clean up temp element
-
-            const part2 = block.text.substring(part1.length);
-
-            // Insert the part that fits
-            if (part1.trim()) {
-              const part1Block: ContentBlock = { ...block, text: part1 };
-              const part1Element = document.createElement("div");
-              if (!isBreakable) part1Element.className = "block-wrapper";
-              part1Element.innerHTML = renderToString(React.createElement(SectionRenderer, { block: part1Block, theme }));
-              currentSectionWrapper.appendChild(part1Element);
-            }
-
-            // Add the remainder to be processed in the next iteration
-            if (part2.trim()) {
-              const remainderBlock: ContentBlock = { ...block, text: part2 };
-              allBlocks.splice(i + 1, 0, { ...allBlocks[i], block: remainderBlock });
-            }
-
-            // We've handled this block, so we can continue the loop
-            continue;
-          }
-        }
-      }
-    }
-  };
-
-  /**
-   * Export to PDF function
-   */
+  // Export PDF
   const handleExportPDF = async () => {
     if (!rootRef.current) return;
-
+    setIsGenerating(true);
     try {
-      setIsGenerating(true);
-
-      const options = {
-        margin: 0,
-        filename: `${article?.title || "document"}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-        },
-        jsPDF: {
-          unit: "px",
-          format: "a4",
-          orientation: "portrait",
-        },
-      };
-
-      await html2pdf().from(rootRef.current).set(options).save();
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Error generating PDF. Please try again.");
-    } finally {
-      setIsGenerating(false);
+      await html2pdf()
+        .from(rootRef.current)
+        .set({
+          margin: 0,
+          filename: `${article?.title || "document"}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+          jsPDF: { unit: "px", format: "a4", orientation: "portrait" },
+        })
+        .save();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to export PDF");
     }
+    setIsGenerating(false);
   };
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">PDF Designer</h1>
-        <p className="text-gray-600">Create beautiful, professional PDF documents from web articles.</p>
-      </div>
+      <h1 className="text-3xl font-bold mb-4">PDF Designer</h1>
+      <ArticleExtractor onExtract={setArticle} />
 
-      {/* Controls */}
-      <div className="mb-6 space-y-4">
-        <ArticleExtractor onExtract={setArticle} />
+      {article && (
+        <div className="mt-4 flex items-center space-x-4">
+          <ThemeSelector selected={theme} onChange={setTheme} />
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={showProfile}
+              onChange={(e) => setShowProfile(e.target.checked)}
+            />
+            <span className="ml-2">Show Profile Sidebar</span>
+          </label>
+          <button
+            onClick={handleExportPDF}
+            disabled={isGenerating}
+            className="px-4 py-2 bg-green-600 text-white rounded"
+          >
+            {isGenerating ? "Generating…" : "Export PDF"}
+          </button>
+        </div>
+      )}
 
-        {article && (
-          <div className="flex flex-wrap gap-4 items-center p-4 bg-white border border-gray-200 rounded-lg">
-            <ThemeSelector selected={theme} onChange={setTheme} />
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="showProfile"
-                checked={showProfile}
-                onChange={(e) => setShowProfile(e.target.checked)}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="showProfile" className="text-sm font-medium text-gray-700">
-                Show Profile Sidebar
-              </label>
-            </div>
-
-            <button
-              onClick={handleExportPDF}
-              disabled={isGenerating}
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium">
-              {isGenerating ? "Generating..." : "Export PDF"}
-            </button>
-          </div>
+      <div className="mt-6 border-t pt-6">
+        {article ? (
+          <div ref={rootRef} style={{ width: "100%" }} />
+        ) : (
+          <p className="text-gray-500">Load an article to preview</p>
         )}
       </div>
-
-      {/* Preview */}
-      {article && (
-        <div className="border-t border-gray-200 pt-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Preview</h2>
-          <div
-            ref={rootRef}
-            style={{
-              minHeight: "200px",
-              display: "block",
-              width: "100%",
-              overflow: "visible",
-            }}
-          />
-
-          {isGenerating && (
-            <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-gray-600">Generating document...</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {!article && (
-        <div className="text-center py-12 text-gray-500">
-          <p className="text-lg">Load an article to start designing your PDF</p>
-        </div>
-      )}
     </div>
   );
 };
+
+// The layout engine that places content into pages & columns
+class PlacementEngine {
+  config: PageConfig;
+  theme: Theme;
+  showProfile: boolean;
+  measureHeight: (html: string, width: number, is2Column?: boolean) => number;
+  pages: VPage[] = [];
+  currentPageIndex = 0;
+  currentColumnIndex = 0;
+
+  constructor(
+    config: PageConfig,
+    theme: Theme,
+    showProfile: boolean,
+    container: HTMLElement
+  ) {
+    this.config = config;
+    this.theme = theme;
+    this.showProfile = showProfile;
+    this.measureHeight = createHeightMeasurer(container);
+  }
+
+  async generateLayout(article: ExtractedArticle): Promise<VPage[]> {
+    this.pages = [];
+    this.currentPageIndex = 0;
+    this.currentColumnIndex = 0;
+    this.createNewPage(true);
+
+    const allElements = article.sections.flatMap((section, idx) => {
+      const use2Col = shouldSectionUse2Column(section);
+      const elems = this.flattenSectionToElements(section, idx);
+      return elems.map((el) => ({ ...el, use2Col }));
+    });
+
+    for (const el of allElements) {
+      this.placeElement(el);
+    }
+
+    this.postProcess();
+    return this.pages;
+  }
+
+  placeElement(element: any, isRetry: boolean = false) {
+    let page = this.pages[this.currentPageIndex];
+    const wants2Col = !!element.use2Col;
+    const pageIs2Col = page.columns.length > 1;
+    const col = page.columns[this.currentColumnIndex];
+    const remaining = col.height - col.contentHeight;
+    const threshold = 400;
+    const isEmpty =
+      page.spanningElements.length === 0 &&
+      page.columns.every((c) => c.content.length === 0);
+
+    // Switch layout if section type changes
+    if (wants2Col !== pageIs2Col) {
+      if (isEmpty) {
+        this.reconfigurePage(this.currentPageIndex, wants2Col);
+      } else if (remaining > threshold) {
+        // new section in same page
+        this.pages[this.currentPageIndex].spanningElements.push(element);
+        this.reconfigurePage(this.currentPageIndex, wants2Col);
+        return;
+      } else {
+        this.createNewPage(false, wants2Col);
+      }
+      page = this.pages[this.currentPageIndex];
+    }
+
+    // Spanning (headings, large images)
+    const isSpan =
+      (element.isMainHeading ||
+        (element.type === "image" && isLargeImage(element.src || ""))) &&
+      page.columns.length > 1;
+    if (isSpan) {
+      this.placeSpanningElement(element);
+      return;
+    }
+
+    // Normal column flow
+    const html = renderToString(
+      React.createElement(SectionRenderer, { block: element, theme: this.theme })
+    );
+    const h = this.measureHeight(
+      html,
+      page.columns[this.currentColumnIndex].width,
+      page.columns[this.currentColumnIndex].is2Column
+    );
+    const spaceLeft =
+      this.pages[this.currentPageIndex].columns[this.currentColumnIndex].height -
+      this.pages[this.currentPageIndex].columns[this.currentColumnIndex].contentHeight;
+
+    if (h <= spaceLeft) {
+      this.addElementToColumn(element, h);
+    } else if (col.content.length > 0) {
+      this.moveToNextColumnOrPage(element.use2Col);
+      this.placeElement(element);
+    } else if (element.type === "paragraph" && !isRetry) {
+      this.splitAndPlaceParagraph(element, col);
+    } else {
+      this.addElementToColumn(element, h);
+    }
+  }
+
+  // Build a new page & initial columns
+  createNewPage(isFirst: boolean, force2Col: boolean = false) {
+    this.currentPageIndex = this.pages.length;
+    this.currentColumnIndex = 0;
+    const contentH = isFirst
+      ? this.config.pageHeight - this.config.coverHeight - this.config.pagePadding * 2
+      : this.config.pageHeight - this.config.pagePadding * 2;
+    const availW =
+      this.showProfile && isFirst
+        ? this.config.pageWidth - this.config.profileWidth - this.config.pagePadding * 3
+        : this.config.pageWidth - this.config.pagePadding * 2;
+
+    const newPage: VPage = {
+      pageNumber: this.pages.length + 1,
+      isFirstPage: isFirst,
+      spanningElements: [],
+      columns: [],
+    };
+    if (force2Col) {
+      const w = (availW - this.config.gapMin) / 2;
+      newPage.columns.push({ width: w, height: contentH, content: [], contentHeight: 0, is2Column: true });
+      newPage.columns.push({ width: w, height: contentH, content: [], contentHeight: 0, is2Column: true });
+    } else {
+      newPage.columns.push({ width: availW, height: contentH, content: [], contentHeight: 0, is2Column: false });
+    }
+    this.pages.push(newPage);
+  }
+
+  // Reconfigure an existing page's columns
+  reconfigurePage(pageIdx: number, twoCol: boolean) {
+    const page = this.pages[pageIdx];
+    page.columns = [];
+    const contentH = page.isFirstPage
+      ? this.config.pageHeight - this.config.coverHeight - this.config.pagePadding * 2
+      : this.config.pageHeight - this.config.pagePadding * 2;
+    const availW =
+      this.showProfile && page.isFirstPage
+        ? this.config.pageWidth - this.config.profileWidth - this.config.pagePadding * 3
+        : this.config.pageWidth - this.config.pagePadding * 2;
+    if (twoCol) {
+      const w = (availW - this.config.gapMin) / 2;
+      page.columns.push({ width: w, height: contentH, content: [], contentHeight: 0, is2Column: true });
+      page.columns.push({ width: w, height: contentH, content: [], contentHeight: 0, is2Column: true });
+    } else {
+      page.columns.push({ width: availW, height: contentH, content: [], contentHeight: 0, is2Column: false });
+    }
+    this.currentColumnIndex = 0;
+  }
+
+  // After placement, ensure headings don't orphan and collapse empty 2-col pages
+  postProcess() {
+    this.pages.forEach((page, pi) => {
+      page.columns.forEach((col, ci) => {
+        while (col.content.length) {
+          const last = col.content[col.content.length - 1];
+          if (last.type === "heading" || last.isMainHeading) {
+            const orphan = col.content.pop()!;
+            let np = page;
+            let nci = ci + 1;
+            if (nci >= page.columns.length) {
+              if (pi + 1 >= this.pages.length) this.createNewPage(false, orphan.use2Col);
+              np = this.pages[pi + 1];
+              nci = 0;
+            }
+            np.columns[nci].content.unshift(orphan);
+          } else break;
+        }
+      });
+    });
+    this.revertLargeEmpty2ColPages();
+  }
+
+  // Turn any page with two columns but content fits in one into a single column
+  revertLargeEmpty2ColPages() {
+    this.pages.forEach((page) => {
+      if (page.columns.length === 2) {
+        const h0 = page.columns[0].contentHeight;
+        const h1 = page.columns[1].contentHeight;
+        const ph = page.columns[0].height;
+        if (h0 + h1 <= ph) {
+          const merged = [...page.columns[0].content, ...page.columns[1].content];
+          const availW =
+            this.showProfile && page.isFirstPage
+              ? this.config.pageWidth - this.config.profileWidth - this.config.pagePadding * 3
+              : this.config.pageWidth - this.config.pagePadding * 2;
+          page.columns = [
+            { width: availW, height: ph, content: merged, contentHeight: h0 + h1, is2Column: false },
+          ];
+        }
+      }
+    });
+  }
+
+  // Place a heading or large image spanning full width
+  placeSpanningElement(element: any) {
+    const page = this.pages[this.currentPageIndex];
+    const availW =
+      this.showProfile
+        ? this.config.pageWidth - this.config.profileWidth - this.config.pagePadding * 3
+        : this.config.pageWidth - this.config.pagePadding * 2;
+    const html = renderToString(
+      React.createElement(SectionRenderer, { block: element, theme: this.theme })
+    );
+    const h = this.measureHeight(html, availW, false);
+    const usedH = page.spanningElements.reduce((sum, el) => {
+      const eh = renderToString(
+        React.createElement(SectionRenderer, { block: el, theme: this.theme })
+      );
+      return sum + this.measureHeight(eh, availW, false);
+    }, 0);
+    const hasCols = page.columns.some((c) => c.content.length > 0);
+    if (hasCols || usedH + h > page.columns[0].height) {
+      this.createNewPage(false, element.use2Col);
+      this.placeSpanningElement(element);
+      return;
+    }
+    page.spanningElements.push(element);
+  }
+
+  // Split long paragraphs across columns
+  splitAndPlaceParagraph(element: any, column: VColumn) {
+    const sentences = element.text!.match(/[^.!?]+[.!?]+\s*|.+/g) || [element.text!];
+    let part1 = "";
+    let part2 = element.text!;
+    for (let i = 0; i < sentences.length; i++) {
+      const test = part1 + sentences[i];
+      const tmpBlock = { ...element, text: test };
+      const tmpHtml = renderToString(
+        React.createElement(SectionRenderer, { block: tmpBlock, theme: this.theme })
+      );
+      const tmpH = this.measureHeight(tmpHtml, column.width, column.is2Column);
+      if (tmpH > column.height - column.contentHeight && part1) break;
+      part1 = test;
+      part2 = element.text!.slice(part1.length);
+    }
+    const tail = part2.trim();
+    if (tail && tail.length < this.config.tinyTailMax) {
+      const parts = part1.match(/[^.!?]+[.!?]+\s*|.+/g);
+      if (parts && parts.length > 1) {
+        const last = parts.pop()!;
+        part1 = parts.join("");
+        part2 = last + part2;
+      }
+    }
+    if (part1.trim()) this.placeElement({ ...element, text: part1 }, true);
+    if (part2.trim()) this.placeElement({ ...element, text: part2 }, false);
+  }
+
+  // Add element to current column
+  addElementToColumn(element: any, height: number) {
+    const col = this.pages[this.currentPageIndex].columns[this.currentColumnIndex];
+    col.content.push(element);
+    col.contentHeight += height;
+  }
+
+  // Move to next column or page
+  moveToNextColumnOrPage(twoCol: boolean) {
+    const page = this.pages[this.currentPageIndex];
+    if (this.currentColumnIndex < page.columns.length - 1) {
+      this.currentColumnIndex++;
+    } else {
+      this.createNewPage(false, twoCol);
+    }
+  }
+
+  // Convert virtual pages into DOM
+  renderToDOM(container: HTMLElement, pages: VPage[]) {
+    container.innerHTML = "";
+    container.className = `pdf-container ${this.theme.fontFamily} ${this.theme.backgroundColor}`;
+    pages.forEach((page) => {
+      const pageEl = document.createElement("div");
+      pageEl.className = "pdf-page";
+      container.appendChild(pageEl);
+
+      // cover on first page
+      if (page.isFirstPage) {
+        const cov = document.createElement("div");
+        cov.style.height = `${this.config.coverHeight}px`;
+        cov.innerHTML = renderToString(
+          React.createElement(CoverDesign, { article: container, coverHeight: this.config.coverHeight })
+        );
+        pageEl.appendChild(cov);
+      }
+
+      // content wrapper
+      const wrap = document.createElement("div");
+      wrap.className = "content-wrapper";
+      wrap.style.height =
+        page.isFirstPage
+          ? `${this.config.pageHeight - this.config.coverHeight}px`
+          : `${this.config.pageHeight}px`;
+      pageEl.appendChild(wrap);
+
+      // profile sidebar
+      if (this.showProfile && page.isFirstPage) {
+        const sidebar = document.createElement("div");
+        sidebar.className = "profile-sidebar";
+        sidebar.style.width = `${this.config.profileWidth}px`;
+        sidebar.innerHTML = renderToString(
+          React.createElement(ProfileDesign, { article: container, width: this.config.profileWidth })
+        );
+        wrap.appendChild(sidebar);
+      }
+
+      // main content area
+      const main = document.createElement("div");
+      main.className = "pdf-content-area";
+      wrap.appendChild(main);
+
+      // spanning elements
+      const spanWrap = document.createElement("div");
+      spanWrap.className = "spanning-wrapper";
+      main.appendChild(spanWrap);
+      page.spanningElements.forEach((el) => {
+        const html = renderToString(
+          React.createElement(SectionRenderer, { block: el, theme: this.theme })
+        );
+        const div = document.createElement("div");
+        div.innerHTML = html;
+        spanWrap.appendChild(div);
+      });
+
+      // columns
+      const colsWrap = document.createElement("div");
+      colsWrap.className = "columns-wrapper";
+      main.appendChild(colsWrap);
+      page.columns.forEach((col) => {
+        const colEl = document.createElement("div");
+        colEl.className = "column";
+        colEl.style.width = `${col.width}px`;
+        colsWrap.appendChild(colEl);
+        col.content.forEach((el) => {
+          const html = renderToString(
+            React.createElement(SectionRenderer, { block: el, theme: this.theme })
+          );
+          const div = document.createElement("div");
+          div.innerHTML = html;
+          colEl.appendChild(div);
+        });
+      });
+    });
+  }
+
+  // Break a section into individual heading/blocks
+  flattenSectionToElements(section: any, sectionIndex: number): any[] {
+    const elems: any[] = [];
+    const sectionId = `section-${sectionIndex}`;
+    if (section.heading) {
+      elems.push({ ...section.heading, isMainHeading: true, sectionId });
+    }
+    let blocks: ContentBlock[] = [...section.content];
+    (section.subsections || []).forEach((ss: any) => {
+      if (ss.heading) elems.push({ ...ss.heading, isMainHeading: false, sectionId });
+      blocks.push(...ss.content);
+    });
+    for (let i = 0; i < blocks.length; i++) {
+      const b = blocks[i];
+      if (b.type === "image" && b.src) {
+        const next = i + 1 < blocks.length ? blocks[i + 1] : null;
+        if (next && next.type === "paragraph" && next.text && next.text.length < 250) {
+          elems.push({ type: "atomic", content: [b, { ...next, type: "caption" }], sectionId });
+          i++;
+          continue;
+        }
+      }
+      elems.push({ ...b, sectionId });
+    }
+    return elems;
+  }
+}
