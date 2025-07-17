@@ -19,9 +19,15 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["vitest/globals"],
-    //allow unused imports
+
+    // 🔧 Linting rules turned OFF
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "noImplicitAny": false,
+    "noFallthroughCasesInSwitch": false,
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

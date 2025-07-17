@@ -1,13 +1,47 @@
+/* cover css*/
+
+@font-face {
+  font-family: "RBC Text";
+  src: url(../assets/fonts/rbctext-regular-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Text Medium";
+  src: url(../assets/fonts/rbctext-medium-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Text Bold";
+  src: url(../assets/fonts/rbctext-bold-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Display";
+  src: url(../assets/fonts/rbcdisplay-regular-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Display Medium";
+  src: url(../assets/fonts/rbcdisplay-medium-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Display Bold";
+  src: url(../assets/fonts/rbcdisplay-bold-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+*,
 html {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-.cover {
-  height: 340.1px;
-  width: 794px;
-  position: relative;
+  color: "#444";
 }
 
 .theme-long-ribbon {
@@ -19,48 +53,40 @@ html {
   background-repeat: no-repeat;
 }
 
-/* .theme-long-ribbon-theme-1 {
-  background-image: url("https://www.rbcgam.com/contentAsset/image/2161a38630e1ac0afef8520953b03b8f/fileAsset/filter/Resize,Jpeg/resize_w/1680/jpeg_q/86/");
-} */
-
-/* .theme-long-ribbon-theme-2 {
-  background-image: url("./cover-images/6_reasons_to_invest_background.png");
-}
-
-.theme-slim-ribbon-theme-1 {
-  background-image: url("./cover-images/china-brand.jpeg");
-}
-
 .theme-slim-ribbon-theme-2 {
   background-image: url("./cover-images/city-view-arial.png");
 }
 
 .theme-slim-ribbon-theme-3 {
   background-image: url("./cover-images/the-death-of-the-dollar-us-version.jpeg");
-} */
+}
+
+.theme-slim-ribbon-theme-1 {
+  background-image: url("./cover-images/china-brand.jpeg");
+}
 
 .theme-long-ribbon::after {
   content: "";
-  background-image: url("./cover-images/ribbon-long.png");
-  background-size: contain;
+  background-image: url("/cover-images/ribbon-long.png");
+  background-size: cover;
   background-repeat: no-repeat;
   position: absolute;
   top: 0;
-  left: 102px;
-  width: calc(100% - 102px);
+  left: -30px;
+  width: 100%;
   height: 100%;
   z-index: 1;
 }
 
 .theme-slim-ribbon::after {
   content: "";
-  background-image: url("./cover-images/rbc_ribbon.png");
-  background-size: contain;
+  background-image: url("/cover-images/rbc ribbon.png");
+  background-size: cover;
   background-repeat: no-repeat;
   position: absolute;
   bottom: 0;
-  left: 0;
-  width: calc(100% - 140px);
+  left: -50px;
+  width: 100%;
   height: 100%;
   z-index: 3;
 }
@@ -70,36 +96,37 @@ html {
   align-items: start;
   gap: 5px;
   position: absolute;
-  top: 48px;
-  left: 48px;
+  top: 60px;
+  left: 60px;
   z-index: 2;
 }
 
 .brand-logo img {
-  width: 43.2px;
-  height: 43.2px;
+  width: 60px;
+  height: 60px;
 }
 
 .brand-logo p {
   font-family: "RBC Text Bold";
-  font-size: 14px;
+  font-size: 16px;
   color: #fff;
 }
 
 .cover .logo {
-  width: 56.69px;
-  height: 75.59px;
+  width: 60px;
+  height: 60px;
   position: absolute;
   bottom: 26.46px;
   right: 36.69px;
   z-index: 2;
+  scale: 5;
 }
 
 .cover-image {
   position: absolute;
   top: 0;
   left: 0;
-  width: 680px;
+  width: 650px;
   height: 100%;
   background-size: cover;
   transition: all 0.3s ease;
@@ -107,11 +134,15 @@ html {
 }
 
 .cover-image-theme-1 {
-  background-image: url("https://www.rbcgam.com/contentAsset/image/2161a38630e1ac0afef8520953b03b8f/fileAsset/filter/Resize,Jpeg/resize_w/1680/jpeg_q/86/");
+  background-image: url("/cover-images/city-view-arial.png");
 }
 
 .cover-image-theme-2 {
-  background-image: url("./cover-images/the-death-of-the-dollar-us-version.jpeg");
+  background-image: url("/cover-images/6 reasons to invest background.png");
+}
+
+.cover-image-theme-3 {
+  background-image: url("/cover-images/the-death-of-the-dollar-us-version.jpeg");
 }
 
 .cover-image::after {
@@ -140,11 +171,11 @@ html {
 }
 
 .theme-long-ribbon-title-frame {
-  max-width: 310px;
+  max-width: 370px;
 }
 
 .theme-slim-ribbon-title-frame {
-  max-width: 260px;
+  max-width: calc(100% - 200px);
 }
 
 .title-frame {

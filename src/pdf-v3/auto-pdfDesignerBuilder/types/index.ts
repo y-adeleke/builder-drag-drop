@@ -4,7 +4,25 @@ import { CSSProperties } from "react";
 // ----------------------------------------------------------------
 // Content Block Types
 // ----------------------------------------------------------------
-export type BlockType = "heading" | "paragraph" | "image" | "quote" | "list" | "table" | "link" | "divider" | "video" | "audio" | "embed" | "definitionList" | "span" | "atomic" | "caption";
+export type BlockType =
+  | "heading"
+  | "paragraph"
+  | "image"
+  | "quote"
+  | "list"
+  | "table"
+  | "link"
+  | "divider"
+  | "video"
+  | "audio"
+  | "embed"
+  | "definitionList"
+  | "span"
+  | "atomic"
+  | "caption"
+  | "li"
+  | "ul"
+  | "2col-section";
 
 export interface ContentBlock {
   type: BlockType;
@@ -22,6 +40,7 @@ export interface ContentBlock {
   use2Col?: boolean;
   sectionId?: string;
   isMainHeading?: boolean;
+  height?: number;
 }
 
 // ----------------------------------------------------------------
@@ -43,7 +62,10 @@ export interface Bundle {
 export interface PageConfig {
   pageHeight: number;
   pageWidth: number;
-  pagePadding: number;
+  pagePaddingTop: number;
+  pagePaddingRight: number;
+  pagePaddingBottom: number;
+  pagePaddingLeft: number;
   coverHeight: number;
   profileWidth: number;
   gapMin: number;
@@ -61,11 +83,18 @@ export interface VColumn {
   is2Column: boolean;
 }
 
+//new
+export interface VColumnSet {
+  columns: VColumn[];
+  height: number;
+}
+
 export interface VPage {
   pageNumber: number;
-  columns: VColumn[];
+  columns?: VColumn[];
   isFirstPage: boolean;
   spanningElements: ContentBlock[];
+  columnSets?: VColumnSet[];
 }
 
 // ----------------------------------------------------------------
@@ -101,11 +130,11 @@ export interface ExtractedArticle {
     }>;
   }>;
   description: string | null;
-  profiles: {
+  profiles: Array<{
     name: string | null;
     picture: string | null;
     title: string | null;
-  };
+  }>;
 }
 
 // ----------------------------------------------------------------

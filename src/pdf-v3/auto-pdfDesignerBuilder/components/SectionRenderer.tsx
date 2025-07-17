@@ -34,8 +34,10 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
     case "heading": {
       const HeadingTag = block.level === 1 ? "h1" : block.level === 3 ? "h3" : "h2";
       return (
-        <div style={mergedStyle} className={`pdf-section heading ${theme.headingBgColor} break-inside-avoid`}>
-          <HeadingTag className={`font-bold text-xl ${theme.accentColor} leading-tight`}>{block.text}</HeadingTag>
+        <div style={mergedStyle} className={`pdf-section heading break-inside-avoid`}>
+          <HeadingTag className={`font-bold leading-tight header-color`} style={{ fontSize: "14px" }}>
+            {block.text}
+          </HeadingTag>
         </div>
       );
     }
@@ -43,7 +45,9 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
     case "paragraph":
       return (
         <div style={mergedStyle} className={`pdf-section paragraph ${theme.textColor} leading-relaxed`}>
-          <p className="orphans-2 widows-2 text-content">{block.text}</p>
+          <p className="orphans-2 widows-2 text-content" style={{ fontSize: "12px" }}>
+            {block.text}
+          </p>
         </div>
       );
 
@@ -52,20 +56,6 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
         <div style={mergedStyle} className="pdf-section image break-inside-avoid">
           <img src={block.src} alt={block.alt || ""} className="w-full rounded shadow-sm" style={{ maxHeight: "400px", objectFit: "cover" }} />
           {block.caption && <p className="text-sm text-gray-600 mt-2 text-center italic">{block.caption}</p>}
-        </div>
-      );
-
-    case "atomic":
-      return (
-        <div style={mergedStyle} className="pdf-section atomic-block break-inside-avoid">
-          {block.content?.map((innerBlock, index) => <SectionRenderer key={index} block={innerBlock} theme={theme} />)}
-        </div>
-      );
-
-    case "caption":
-      return (
-        <div style={mergedStyle} className={`pdf-section caption`}>
-          <p className="text-sm text-gray-600 mt-1 text-center italic">{block.text}</p>
         </div>
       );
 
@@ -81,7 +71,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
         <div style={mergedStyle} className="pdf-section list">
           <ul className="list-disc pl-5 space-y-1">
             {block.items?.map((item, index) => (
-              <li key={index} className={theme.textColor}>
+              <li key={index} className={theme.textColor} style={{ fontSize: "12px" }}>
                 {item}
               </li>
             ))}
@@ -89,6 +79,12 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
         </div>
       );
 
+    case "li":
+      return (
+        <li style={mergedStyle} className={`pdf-section li ${theme.textColor}`}>
+          {block.text}
+        </li>
+      );
     case "table":
       return (
         <div style={mergedStyle} className="pdf-section table overflow-x-auto break-inside-avoid">
@@ -97,7 +93,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
               {block.rows?.map((row, rowIndex) => (
                 <tr key={rowIndex} className={rowIndex === 0 ? "bg-gray-50 font-semibold" : ""}>
                   {row.map((cell, cellIndex) => (
-                    <td key={cellIndex} className={`border px-3 py-2 ${theme.borderColor} ${theme.textColor}`}>
+                    <td key={cellIndex} className={`border px-3 py-2 ${theme.borderColor} ${theme.textColor}`} style={{ fontSize: "12px" }}>
                       {cell}
                     </td>
                   ))}
@@ -111,7 +107,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
     case "link":
       return (
         <div style={mergedStyle} className="pdf-section">
-          <a href={block.src} className={`${theme.accentColor} underline hover:no-underline transition-all`} target="_blank" rel="noopener noreferrer">
+          <a href={block.src} className={`${theme.accentColor} underline hover:no-underline transition-all`} style={{ fontSize: "12px" }} target="_blank" rel="noopener noreferrer">
             {block.text || block.src}
           </a>
         </div>
@@ -155,8 +151,12 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
               const [term, definition] = item.split("|");
               return (
                 <React.Fragment key={index}>
-                  <dt className="font-bold">{term}</dt>
-                  <dd className="ml-4 mb-2 text-gray-700">{definition}</dd>
+                  <dt className="font-bold" style={{ fontSize: "12px" }}>
+                    {term}
+                  </dt>
+                  <dd className="ml-4 mb-2 text-gray-700" style={{ fontSize: "12px" }}>
+                    {definition}
+                  </dd>
                 </React.Fragment>
               );
             })}
@@ -167,12 +167,27 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
     case "span":
       return (
         <div style={mergedStyle} className="pdf-section">
-          <span className={theme.textColor}>{block.text}</span>
+          <span className={theme.textColor} style={{ fontSize: "12px" }}>
+            {block.text}
+          </span>
         </div>
       );
 
+    case "atomic":
+      return (
+        <div style={mergedStyle} className="pdf-section atomic break-inside-avoid">
+          {block.content.map((subBlock, index) => (
+            <SectionRenderer key={index} block={subBlock} theme={theme} />
+          ))}
+        </div>
+      );
+
+    case "caption":
+      return <p className="pdf-section caption text-sm text-gray-600 mt-2 text-center italic">{block.text}</p>;
+
     default:
       console.warn(`Unknown block type: ${(block as any).type}`);
+      console.log("Unknown block type encountered.", block);
       return null;
   }
 };

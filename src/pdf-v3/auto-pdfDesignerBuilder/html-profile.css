@@ -1,9 +1,12 @@
+/* html-profile css*/
+
 /* body {
   padding: 100px;
 } */
 
 .profiles-frame {
-  width: 153.6px;
+  margin-top: 50px;
+  max-width: 153.6px;
   padding: 20px;
   background-color: #e7eef1;
 }
@@ -21,6 +24,7 @@
 }
 
 .profile .profile-image {
+  height: 120px;
   border-bottom: 1px solid #ccc;
 }
 
@@ -47,6 +51,6 @@
 }
 
 .publish-date-frame span {
-  font-size: 8pt;
+  font-size: 8px;
   font-family: "RBC Text";
 }

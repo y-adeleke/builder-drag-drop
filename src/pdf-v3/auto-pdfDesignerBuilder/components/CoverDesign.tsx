@@ -1,51 +1,134 @@
-// components/CoverDesign.tsx
 import React from "react";
 import { ExtractedArticle } from "../types";
 
 interface CoverDesignProps {
   article: ExtractedArticle;
   coverHeight: number;
+  coverImage?: string;
+  designType?: "slim" | "long";
+  brandName?: "BlueBay" | "Global";
+  includeLogo?: boolean;
+  uploadedCoverImage?: string | null;
 }
 
-export const CoverDesign: React.FC<CoverDesignProps> = ({ article, coverHeight }) => {
-  return (
-    <div className="cover theme-long-ribbon relative w-full overflow-hidden" style={{ height: `${coverHeight}px`, minHeight: `${coverHeight}px`, maxHeight: `${coverHeight}px` }}>
-      {/* Background Image */}
-      {article.backgroundImg && <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${article.backgroundImg})` }} />}
+export const CoverDesign: React.FC<CoverDesignProps> = ({
+  article,
+  coverHeight,
+  coverImage = "city-view-arial.png",
+  designType = "slim",
+  brandName = "BlueBay",
+  includeLogo = true,
+  uploadedCoverImage = null,
+}) => {
+  // Use uploaded image URL if available, otherwise use the default image from the /cover-images directory
+  const coverImageUrl = uploadedCoverImage || `/cover-images/${coverImage}`;
 
-      {/* Default background if no image */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800" />
+  // Generate a unique ID for the clipPath to avoid conflicts when multiple covers are rendered
+  const clipPathId = `cover-clip-${Math.random().toString(36).substring(2, 9)}`;
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-30" />
-
-      {/* Brand Logo */}
-      <div className="brand-logo absolute top-12 left-12 flex items-start gap-2 z-10">
-        <img className="cover-image theme-long-ribbon-brand-logo w-8 h-8" src="https://www.rbcroyalbank.com/dvl/assets/images/logos/rbc-logo-shield.svg" alt="RBC Logo" />
-        <div className="text-white text-sm leading-tight">
-          RBC BlueBay
-          <br />
+  const renderBrandName = () => {
+    if (brandName === "BlueBay") {
+      return includeLogo ? (
+        <p>
+          RBC BlueBay <br />
           Asset Management
-        </div>
+        </p>
+      ) : (
+        <p>RBC BlueBay Asset Management</p>
+      );
+    } else {
+      return includeLogo ? (
+        <p>
+          Global Asset <br />
+          Management
+        </p>
+      ) : (
+        <p>Global Asset Management</p>
+      );
+    }
+  };
+
+  return designType === "slim" ? (
+    <div
+      className="cover theme-slim-ribbon relative w-full overflow-hidden"
+      style={{
+        height: `${coverHeight}px`,
+        minHeight: `${coverHeight}px`,
+        maxHeight: `${coverHeight}px`,
+        backgroundImage: `url('${coverImageUrl}')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}>
+      <div className="brand-logo">
+        {includeLogo && <img src="/cover-images/rbc-royal-bank.svg" alt="brand logo" srcSet="" />}
+        {renderBrandName()}
       </div>
 
-      {/* Main Logo */}
-      <img className="logo absolute top-12 right-12 w-12 h-12 z-10" src="https://www.rbcroyalbank.com/dvl/assets/images/logos/rbc-logo-shield.svg" alt="RBC Logo" />
+      <div className="cover-shadow-theme-slim-ribbon"></div>
 
-      {/* Ribbon Effect */}
-      <div className="absolute top-0 left-24 w-3/4 h-full z-[1] opacity-80">
-        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent transform skew-x-12" />
+      <div className="title-frame theme-slim-ribbon-title-frame">
+        <span className="title">{article.title}</span>
+        <p className="desc">{article.date}</p>
       </div>
 
-      {/* Title Frame */}
-      <div className="title-frame theme-long-ribbon-title-frame absolute bottom-12 left-12 z-20 max-w-md">
-        <h1 className="title text-white text-3xl font-bold leading-tight mb-3 break-words">{article.title}</h1>
-        {article.description && <p className="desc text-white text-base leading-relaxed break-words">{article.description}</p>}
-        {article.date && <p className="text-white/80 text-sm mt-2">{article.date}</p>}
+      <svg width="0" height="0">
+        <defs>
+          <clipPath id="cover-clip" clipPathUnits="objectBoundingBox">
+            <path
+              d="
+      M0,0
+      L1,0
+      L1,0.5
+      Q1.02,0.85 0.69,1
+      L0,1
+      Z
+    "
+            />
+          </clipPath>
+        </defs>
+      </svg>
+    </div>
+  ) : (
+    <div
+      className="cover theme-long-ribbon relative w-full overflow-hidden"
+      style={{
+        height: `${coverHeight}px`,
+        minHeight: `${coverHeight}px`,
+        maxHeight: `${coverHeight}px`,
+      }}>
+      {" "}
+      <div className="brand-logo">
+        {includeLogo && <img src="/cover-images/rbc-royal-bank.svg" alt="brand logo" srcSet="" />}
+        {renderBrandName()}
       </div>
-
-      {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/60 to-transparent z-[2]" />
+      <img className="logo" src="/cover-images/rbc-royal-bank.svg" alt="rbc logo" srcSet="" />
+      <div
+        className="cover-image"
+        style={{
+          backgroundImage: `url('${coverImageUrl}')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}></div>
+      <div className="title-frame theme-long-ribbon-title-frame">
+        <span className="title">{article.title}</span>
+        <p className="desc">{article.date}</p>
+      </div>
+      <svg width="0" height="0">
+        <defs>
+          <clipPath id="cover-clip" clipPathUnits="objectBoundingBox">
+            <path
+              d="
+        M0,0
+        L1,0
+        L1,0.5
+        Q1.02,0.85 0.69,1
+        L0,1
+        Z
+      "
+            />
+          </clipPath>
+        </defs>
+      </svg>
     </div>
   );
 };

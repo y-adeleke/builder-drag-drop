@@ -1,0 +1,143 @@
+/* PDF Designer modern styling */
+
+/* Cover Image Thumbnail Grid */
+.cover-image-thumbnail {
+  transition: all 0.2s ease-in-out;
+}
+
+.cover-image-thumbnail:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Design Panel Styling */
+.design-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.design-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.design-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.design-panel::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+/* PDF Preview Styling */
+.pdf-preview {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.pdf-preview:hover {
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading Animation */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 20px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #3b82f6;
+}
+
+input:focus + .toggle-slider {
+  box-shadow: 0 0 1px #3b82f6;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(16px);
+}
+
+/* Date and role section styling */
+.date-role-section {
+  font-family: "RBC Text", sans-serif;
+}
+
+/* Page title header styling */
+.page-title-header {
+  font-family: "RBC Text", sans-serif;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Two-column layout styling */
+.two-column-content {
+  column-count: 2;
+  column-gap: 2rem;
+  column-fill: balance;
+}
+
+/* Cover design styles */
+.cover-design-selector {
+  transition: all 0.2s ease;
+}
+
+.cover-design-selector:hover {
+  transform: translateY(-2px);
+}
+
+/* Configuration panel improvements */
+.config-section {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.config-section:last-child {
+  border-bottom: none;
+}

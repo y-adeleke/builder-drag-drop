@@ -1,0 +1,73 @@
+/* index css*/
+
+@font-face {
+  font-family: "RBC Text";
+  src: url(../assets/fonts/rbctext-regular-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Text Medium";
+  src: url(../assets/fonts/rbctext-medium-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Text Bold";
+  src: url(../assets/fonts/rbctext-bold-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Display";
+  src: url(../assets/fonts/rbcdisplay-regular-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Display Medium";
+  src: url(../assets/fonts/rbcdisplay-medium-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RBC Display Bold";
+  src: url(../assets/fonts/rbcdisplay-bold-webfont.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+*,
+html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: "#444";
+  font-family: "RBC Text";
+}
+
+.header-color {
+  color: #003168;
+}
+
+/* h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #003168;
+} */
+
+/* Add to your CSS file */
+.two-col-section {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  display: block;
+  overflow: hidden;
+}
+
+.column-spanning-heading {
+  column-span: all;
+  break-after: avoid;
+  page-break-after: avoid;
+}
