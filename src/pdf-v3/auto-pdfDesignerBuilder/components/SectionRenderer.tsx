@@ -55,7 +55,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
       return (
         <div style={mergedStyle} className="pdf-section image break-inside-avoid">
           <img src={block.src} alt={block.alt || ""} className="w-full rounded shadow-sm" style={{ maxHeight: "400px", objectFit: "cover" }} />
-          {block.caption && <p className="text-sm text-gray-600 mt-2 text-center italic">{block.caption}</p>}
+          {block.caption && <p className="pdf-section caption text-sm text-gray-600 mt-2 text-center italic">{block.caption}</p>}
         </div>
       );
 
@@ -81,7 +81,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
 
     case "li":
       return (
-        <li style={mergedStyle} className={`pdf-section li ${theme.textColor}`}>
+        <li className={`pdf-section li ${theme.textColor}`} style={{ fontSize: "12px" }}>
           {block.text}
         </li>
       );
@@ -173,7 +173,10 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
         </div>
       );
 
-    case "atomic":
+    case "atomic": {
+      const [imgBlock, captionBlock] = block.content;
+
+      // imgBlockRenderer returns ONLY <img>, not a figure
       return (
         <div style={mergedStyle} className="pdf-section atomic break-inside-avoid">
           {block.content.map((subBlock, index) => (
@@ -181,6 +184,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
           ))}
         </div>
       );
+    }
 
     case "caption":
       return <p className="pdf-section caption text-sm text-gray-600 mt-2 text-center italic">{block.text}</p>;

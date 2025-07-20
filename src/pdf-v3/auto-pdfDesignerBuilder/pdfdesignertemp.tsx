@@ -518,6 +518,23 @@ export const PDFDesigner: React.FC = () => {
     for (let i = 0; i < contentBlocks.length; i++) {
       const block = contentBlocks[i];
 
+      /* 1️⃣  IMAGE + CAPTION  ───────────────────────────────────────── */
+      if (
+        block.type === "image" &&
+        contentBlocks[i + 1]?.type === "paragraph" // anything right after the image is a caption
+      ) {
+        const pair = {
+          type: "atomic" as const,
+          content: [block, { ...contentBlocks[i + 1], type: "caption" as const }],
+          use2Col: block.use2Col,
+          sectionId,
+        } satisfies ContentBlock;
+
+        elements.push(pair);
+        i++; // skip the caption we just wrapped
+        continue;
+      }
+
       /* 2️⃣  HEADING + FIRST BODY  (NEW) */
       if ((block.type === "heading" || block.isMainHeading) && i + 1 < contentBlocks.length) {
         const next = contentBlocks[i + 1];
@@ -623,11 +640,11 @@ export const PDFDesigner: React.FC = () => {
     }
     private get pageInnerHeight() {
       const effectiveCoverHeight = this.isMacroMemo ? MACROMEMO_COVER_HEIGHT : this.config.coverHeight;
-      let h = this.page?.isFirstPage
+      let h = this.page.isFirstPage
         ? this.config.pageHeight - effectiveCoverHeight // <- keep ALL padding
         : this.config.pageHeight - this.config.pagePaddingTop - this.config.pagePaddingBottom;
       /* subtract page‑title header on all non‑cover pages */
-      if (!this.page?.isFirstPage && this.includeTitleHeader) {
+      if (!this.page.isFirstPage && this.includeTitleHeader) {
         h -= 36; // keep in sync with DOM header height
       }
       return h;
@@ -712,26 +729,6 @@ export const PDFDesigner: React.FC = () => {
 
     private async placeElement(element: any, idx: number | null = null, isRetry = false): Promise<number> {
       const EXTRA_ATOMIC_BUFFER = 24; // extra space to ensure atomic blocks fit
-
-      /* 0️⃣  orphan‑heading guard -------------------------------------------- */
-      if (element.type === "heading" && idx != null && idx + 1 < this.allElements.length) {
-        const nxt = this.allElements[idx + 1];
-        if (nxt.type !== "heading" && !nxt.isMainHeading) {
-          // 1. Measure heading + next block
-          const hHtml = renderToString(<SectionRenderer block={element} theme={this.theme} />);
-          const hH = await this.measureHeight(hHtml, this.column.width, this.column.is2Column);
-
-          const nHtml = renderToString(<SectionRenderer block={nxt} theme={this.theme} />);
-          const nH = await this.measureHeight(nHtml, this.column.width, this.column.is2Column);
-
-          const free = this.column.height - this.column.contentHeight;
-
-          // 2. If pair won’t fit together, start a fresh column *before* the heading
-          if (hH + nH > free) {
-            this.moveToNextColumnOrSet(nxt.use2Col);
-          }
-        }
-      }
 
       /* –1.  Keep image‑caption atomic together ---------------------------------- */
       if (element.type === "atomic") {
@@ -1366,16 +1363,19 @@ export const PDFDesigner: React.FC = () => {
             <div className="mb-6">
               <h2 className="text-lg font-semibold mb-3">Article Source</h2>
               <ArticleExtractor
-                onExtract={(raw) => {
-                  const base = (raw as any).url; // may be undefined
-                  const fix = (b: ContentBlock) => (b.type === "image" ? normaliseImageSrc({ ...b }, base) : b);
+                onExtract={(extracted) => {
+                  if (!extracted) return;
 
-                  raw.sections.forEach((sec) => {
-                    sec.content = sec.content.map(fix);
-                    sec.subsections?.forEach((ss) => (ss.content = ss.content.map(fix)));
+                  const base = (extracted as any).url; /* optional */
+
+                  const fixBlock = (b: ContentBlock) => (b.type === "image" ? normaliseImageSrc({ ...b }, base) : b);
+
+                  extracted.sections.forEach((sec) => {
+                    sec.content = sec.content.map(fixBlock);
+                    sec.subsections?.forEach((ss) => (ss.content = ss.content.map(fixBlock)));
                   });
 
-                  setArticle(raw);
+                  setArticle(extracted);
                 }}
               />
             </div>

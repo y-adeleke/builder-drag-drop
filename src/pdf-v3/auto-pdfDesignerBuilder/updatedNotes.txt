@@ -1,0 +1,471 @@
+-heading is still being jumped. 
+exmaple:
+here is the start of my 3rd section which coincedattly began in a new page:
+        {
+            "id": 3,
+            "level": 2,
+            "heading": {
+                "type": "heading",
+                "text": "Tariff developments",
+                "level": 2,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "As we will discuss, tariff news has been trending somewhat positively, including a China detente and a U.S.-UK trade deal. In turn, news sentiment in the U.S. has become somewhat less negative (see next chart).",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ],
+            "subsections": [
+                {
+                    "level": 3,
+                    "heading": {
+                        "type": "heading",
+                        "text": "Daily news sentiment in the U.S. has improved",
+                        "level": 3,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/c44e184c1f380b93de9d14e80bcf0fc1",
+                            "alt": "Daily news sentiment in the US has improved",
+                            "style": {}
+                        },
+yet it wrnt into my subsections and place this header:
+  {
+                    "level": 3,
+                    "heading": {
+                        "type": "heading",
+                        "text": "Global trade policy uncertainty has fallen but remains high",
+                        "level": 3,
+                        "style": {}
+                    },
+
+so my first column started with:
+Global trade policy uncertainty has fallen but remains high -my subsection heade
+Tariff developments - actual section header
+As we will discuss, tariff news has been trending somewhat positively, including a China detente and a U.S.-UK trade deal. In turn, news sentiment in the U.S. has become somewhat less negative (see next chart).
+
+
+2. Although a lot of the pages respected the padding, there was an instace where i turned on the header in pages and there was page where the content overflow the first column and was cut off. there was no repect for the padding bottom. in most cases, it worked well though. 
+
+
+3. I noticed a lot of empty pages and the end of the pages...it was just blank why was this created? 
+
+
+4. what is the logic about the first page below cover, when do we jump to create the second page?
+
+4. in some contents that are not so large, 
+forst page bseide profile was complety empty,
+it started the content on second page 
+then alot of white spaces in each page 
+
+it created 16 pages for the contents below:
+ "sections": [
+        {
+            "id": 1,
+            "level": null,
+            "heading": null,
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "The economic backdrop has been highly volatile as President Trump negotiates trade agreements with economies around the world. Progress is being made on several fronts, though, and peak fear related to tariffs is now likely behind. The U.S. has struck trade deals with the U.K. and China, and reciprocal tariffs have been delayed at least until July/August. That said, some level of tariffs remain in place and the ultimate impact on the economy from increased taxation on global trade remains to be seen. So far, confidence of businesses and consumers has taken a hit, but actual economic data has been resilient and leading indicators continue to point to modest growth (exhibits 1 and 2). Overall, we look for slow but positive economic growth in 2025 and recognize that the odds of recession, though not trivial, have diminished due to Trump’s willingness to dial back extreme tariff threats. Looking further ahead, we expect growth to accelerate a bit into 2026 as tariff uncertainty ultimately diminishes and fiscal stimulus offers support.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 1: U.S. consumer and small business confidence",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "image",
+                    "src": "https://www.rbcgam.com/dA/51a40aaa6f12ee40d153f4be0002f210",
+                    "alt": "Exhibit 1 US consumer and small business confidence",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Note: As of May 30, 2025. Source: Bloomberg, RBC GAM",
+                    "style": {}
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 2: Global purchasing managers’ indices",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "image",
+                    "src": "https://www.rbcgam.com/dA/e5657ff89cc66715cb9729402a26a0cc",
+                    "alt": "Exhibit 2 Global purchasing managers indices",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Source: Macrobond, RBC GAM",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "A variety of other risks complicate the outlook in addition to tariffs. Investors have become increasingly concerned with heightened government debt levels, evidenced by a rise in long-term borrowing costs which, if exacerbated, threatens to destabilize financial markets. Moreover, geopolitical tensions remain elevated and military activity has been intense in the Middle East and Russia/Ukraine. These risks are likely to be sources of uncertainty and volatility for the economy and asset prices.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "U.S. dollar decline reveals investors’ reduced preference for U.S. assets",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Currency market movements may be signalling a shift in investor preference away from U.S. assets. The U.S. Dollar Index declined 10% since January despite extreme financial-market volatility and heightened investor fear which, in the past, have acted as tailwinds to the dollar (Exhibit 3). The timing and magnitude of the drop suggests investors may be questioning U.S. exceptionalism and the safe-haven status of the U.S. dollar. Given that the currency remains extremely overvalued, even after this recent drop, we believe that much more weakness still lies ahead. For global investors, these currency moves are critical in comparing assets on a common currency basis, where the dollar’s decline has been a drag on U.S. stock and bond performance so far this year relative to international assets.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 3: U.S. Dollar Index (DXY)",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "image",
+                    "src": "https://www.rbcgam.com/dA/4919a30c1f9e1037da28b7e8c9644c2c",
+                    "alt": "Exhibit 3 US Dollar Index DXY",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Note: As of May 30, 2025. Source: Bloomberg, RBC GAM",
+                    "style": {}
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "The Fed likely resumes rate cutting later this year amid slowing growth",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Many developed-world central banks have continued lowering interest rates in this environment to support economic activity, but further rate relief may be limited if inflation proves stubborn. In the U.S., the Fed has been on pause so far this year since the labour market is healthy and inflation remains slightly above the 2.0% target. Progress on inflation coming down could be temporarily delayed until 2026 due to tariffs, though it is important for the Fed to not overreact to heightened inflation pressure in the near-term given that any price-boost from tariffs is unlikely to be repeated. We expect that slowing growth will nudge the Fed to deliver three 25-basis-point cuts over the next year, in line with what the market has priced in (Exhibit 4), and we recognize that, should the economy weaken further, the Fed has ample capacity to lower interest rates from the currently restrictive stance. Ultimately, the path for rates will depend on the actual data and how trade policy evolves.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 4: Implied fed funds rate",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "12-months futures contracts as of May 30, 2025",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/f8916fef9d9a4d106d7bda37627b407e",
+                            "alt": "Exhibit 4 Implied fed funds rate",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Source: Bloomberg, U.S. Federal Reserve, RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Government bonds offer attractive return potential, modest valuation risk",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Sovereign bond yields have fluctuated in a large range as investors weighed growth, inflation and fiscal concerns. The U.S. 10-year yield fell as low as 3.86% shortly following Trump’s announcement of reciprocal tariffs, a major headwind to growth, in early April then briefly climbed over 4.60% in May following Moody’s U.S. credit-rating downgrade and concern regarding sustainability of the U.S. fiscal position exacerbated by the One Big Beautiful Bill. Currently at around 4.40%, the U.S. 10-year yield is above our modelled estimate of equilibrium, which suggests that sovereign bonds offer decent return potential with only moderate valuation risk (Exhibit 5).",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 5: U.S. 10-year T-bond yield",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "Equilibrium range",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/8d5dc1dd266031f673b258c54cad5a03",
+                            "alt": "Exhibit 5 US 10 year T bond yield",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Note: As of May 31, 2025. Source: RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Stocks rebound from intense sell-off, led by non-U.S. regions",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Global equities experienced extreme volatility during the past quarter with some major indices experiencing bear-market declines of more than 20%. U.S. equities led the downturn as tariff threats escalated, with the tech-heavy NASDAQ falling 24% from its December 2024 peak and the Russell 2000 Small Cap Index falling 28% from its November peak. The S&P 500 fell just shy of a bear market with a 19% peak-to-trough decline, while international equity markets outperformed especially when factoring in recent U.S. dollar weakness (Exhibit 6). Following Trump’s announcement of a 90-day pause to reciprocal tariffs, though, stocks enjoyed a powerful rally, further boosted by the trade deal with China. As a result, most major indices fully erased their prior losses and many non-U.S. markets climbed to new records. The latest rally did push U.S. large-cap stocks back to expensive territory, limiting their return potential. But our models suggest that global stocks, in aggregate, are not expensive and that equity markets outside North America are trading at attractive distances below their fair value (Exhibit 7).",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 6: Major indices’ price change in USD",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "2025 year-to-date",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/26bb9ea9a15b5ef521f0d788499a1ecc",
+                            "alt": "Exhibit 6 Major indices price change in USD",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Note: As of May 30, 2025. Magnificent 7 includes Apple, Microsoft, Alphabet, Amazon, Nvidia, Meta and Tesla. Source: Bloomberg, RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 7: Global stock market composite",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "Equity market indexes relative to equilibrium",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/44041924cbff2a40ac72af8cfbe52d9e",
+                            "alt": "Exhibit 7 Global stock market composite",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Note: As of May 30, 2025. Source: RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 13,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Strong profit growth and maintaining elevated investor confidence are critical to sustaining further gains in the S&P 500",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "With U.S. large-cap stocks trading at premium valuations, maintaining high investor confidence as well as generating solid earnings growth will be critical to sustaining further gains from here. Analysts look for 8.5% profit growth in 2025 followed by 13.5% growth in 2026. Should the S&P 500 trade between 0.5 standard deviations to a full standard deviation above equilibrium, it can deliver low single-digit to high single-digit annualized returns through the end of 2026 if the consensus earnings estimates are achieved (Exhibit 8). That said, earnings growth could face headwinds, particularly if profit margins weaken due to tariffs and re-shoring production to the U.S., which could increase input costs and reduce operating efficiencies. Should profits fail to meet expectations, U.S. stocks would be vulnerable given the starting point of elevated valuations and heightened investor enthusiasm.",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 14,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 8: Earnings estimates and alternative scenarios for valuations and outcomes for the S&P 500",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "image",
+                    "src": "https://www.rbcgam.com/dA/bb9fb8dd89e6c59e1d85182f14c43e8d",
+                    "alt": "Exhibit 8 Earnings estimates and alternative scenarios for valuations and outcomes for the SP 500",
+                    "style": {}
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Note: As of May 30, 2025. Total returns for 2026 are annualized. Source: LSEG I/B/E/S, RBC GAM",
+                    "style": {}
+                }
+            ]
+        },
+        {
+            "id": 15,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Asset mix: increased equity allocation slightly with tilt to non-U.S. markets",
+                "level": 3,
+                "style": {}
+            },
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "Our asset mix balances the risks and opportunities and considers that the current range of outcomes is unusually wide. In our base case scenario, the economy will continue growing at a sluggish pace against a backdrop of modest inflation, allowing for some further central-bank easing. In this environment, we expect sovereign bonds to deliver mid-single-digit returns over the year ahead as long as inflation continues falling toward central bankers’ targets, with the possibility of higher returns should the economy encounter a meaningful slowdown. Although stocks have already enjoyed an impressive recovery, we continue to expect stocks to outperform bonds. Furthermore, the equity-market sell off in March/April generated extremely oversold conditions that have historically been consistent with durable market bottoms. As a result, we added 1% to our equity allocation during the quarter, sourced from cash, favouring regions outside the U.S. where valuations are relatively more appealing. Our current recommended asset mix for a global balanced investor is 61.0% equities (strategic: “neutral”: 60%), 38.0% bonds (strategic “neutral”: 38%) and 1.0% in cash (Exhibit 9).",
+                    "style": {
+                        "text-align": "left"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 16,
+            "level": 3,
+            "heading": {
+                "type": "heading",
+                "text": "Exhibit 9: Recommended asset mix",
+                "level": 3,
+                "style": {}
+            },
+            "content": [],
+            "subsections": [
+                {
+                    "level": 5,
+                    "heading": {
+                        "type": "heading",
+                        "text": "RBC GAM Investment Strategy Committee",
+                        "level": 5,
+                        "style": {}
+                    },
+                    "content": [
+                        {
+                            "type": "image",
+                            "src": "https://www.rbcgam.com/dA/086a07d5031e3d459b7468189ad2fb13",
+                            "alt": "Exhibit 9 Recommended asset mix",
+                            "style": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "text": "Note: As of June 3, 2025. Source: RBC GAM",
+                            "style": {}
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
