@@ -212,7 +212,7 @@ export const PDFDesigner: React.FC = () => {
       const mb = last ? parseFloat(getComputedStyle(last).marginBottom) || 0 : 0;
 
       container.removeChild(probe);
-      const SAFETY = 12;
+      const SAFETY = 0; //12;
 
       console.log(`Height measurement: ${html.slice(0, 50)}... → ${Math.ceil(rectH + mt + mb) + SAFETY}px`);
       return Math.ceil(rectH + mt + mb) + SAFETY;
@@ -645,7 +645,7 @@ export const PDFDesigner: React.FC = () => {
 
     /* PAGE + COLUMN-SET FACTORIES ----------------------------------------- */
     private makeColumn(width: number, height: number, is2Column = false): VColumn {
-      const COLUMN_BOTTOM_GUTTER = 12;
+      const COLUMN_BOTTOM_GUTTER = 0; //12
       return { width, height: height - COLUMN_BOTTOM_GUTTER, is2Column, content: [], contentHeight: 0 };
     }
     private makeColumnSet(use2Col: boolean, maxH: number, availW: number): VColumnSet {
@@ -674,7 +674,7 @@ export const PDFDesigner: React.FC = () => {
       }
       const availableWidth =
         this.showProfile && this.page.isFirstPage
-          ? this.config.pageWidth - this.config.profileWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight - this.config.gapMin
+          ? this.config.pageWidth - this.config.profileWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight
           : this.config.pageWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight;
 
       const set = this.makeColumnSet(force2Col, remaining, availableWidth);
@@ -689,7 +689,7 @@ export const PDFDesigner: React.FC = () => {
       this.currentPageIndex = 0;
       this.currentColumnSetIndex = 0;
       this.currentColumnIndex = 0;
-      this.createNewPage(true);
+      this.createNewPage(true, this.use2ColumnLayout || this.isMacroMemo);
 
       this.allElements = article.sections.flatMap((section, idx) => {
         const use2Col = shouldSectionUse2Column(section);
@@ -866,7 +866,7 @@ export const PDFDesigner: React.FC = () => {
       // first column-set always created immediately
       const availableWidth =
         this.showProfile && this.page.isFirstPage
-          ? this.config.pageWidth - this.config.profileWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight - this.config.gapMin
+          ? this.config.pageWidth - this.config.profileWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight
           : this.config.pageWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight;
 
       const set = this.makeColumnSet(force2Col, this.pageInnerHeight, availableWidth);
@@ -911,7 +911,7 @@ export const PDFDesigner: React.FC = () => {
        * -------------------------------------------------------------- */
       this.pages.forEach((page) => {
         page.columnSets.forEach((set, idx) => {
-          if (set.columns.length === 1 && !this.peekNextUse2Col(page, idx)) {
+          if (!page.isFirstPage && set.columns.length === 1 && !this.peekNextUse2Col(page, idx)) {
             const used = set.columns[0].contentHeight;
             const spare = set.height - used;
 
@@ -946,7 +946,7 @@ export const PDFDesigner: React.FC = () => {
 
       const availableWidth =
         this.showProfile && this.page.isFirstPage
-          ? this.config.pageWidth - this.config.profileWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight - this.config.gapMin
+          ? this.config.pageWidth - this.config.profileWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight
           : this.config.pageWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight;
 
       /* 1️⃣  height of the new element */
@@ -1057,14 +1057,25 @@ export const PDFDesigner: React.FC = () => {
         this.currentColumnIndex++;
         return;
       }
-      // Finished this set …
-      const spare = this.remainingPageHeight();
-      if (spare >= MIN_SET_CONTINUATION) {
+
+      /* we’re at the end of the set ─ check the *true* spare height *inside* it */
+      const used = Math.max(...this.columnSet.columns.map((c) => c.contentHeight));
+      const spareInSet = this.columnSet.height - used;
+
+      if (spareInSet >= MIN_SET_CONTINUATION) {
+        // 1⃣ shrink current set so the page knows that space is free
+        this.columnSet.height = used;
+        this.columnSet.columns.forEach((c) => (c.height = used));
+
+        // 2⃣ and immediately stack a fresh set below it
         this.createNewColumnSet(expected2Col);
-      } else {
-        this.createNewPage(false, expected2Col);
+        return;
       }
+
+      // not enough vertical room → fall back to new page
+      this.createNewPage(false, expected2Col);
     }
+
     renderToDOM(container: HTMLElement, virtualPages: VPage[]) {
       container.innerHTML = "";
       container.className = `pdf-container ${this.theme.fontFamily} ${this.theme.backgroundColor}`;
@@ -1155,6 +1166,9 @@ export const PDFDesigner: React.FC = () => {
 
         const main = document.createElement("div");
         main.className = "pdf-content-area";
+        if (page.isFirstPage) {
+          main.style.padding = `${this.config.pagePaddingTop}px ${this.config.pagePaddingRight}px ${this.config.pagePaddingBottom}px ${this.config.pagePaddingLeft}px`;
+        }
         wrapper.appendChild(main);
 
         /* spanning elements */
@@ -1174,6 +1188,8 @@ export const PDFDesigner: React.FC = () => {
           const setWrap = document.createElement("div");
           setWrap.className = "columns-wrapper";
           setWrap.style.height = `${set.height}px`;
+          setWrap.style.display = "flex";
+          setWrap.style.gap = `${this.config.gapMin}px`;
           main.appendChild(setWrap);
 
           set.columns.forEach((col) => {
