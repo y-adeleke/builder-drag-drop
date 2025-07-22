@@ -29,6 +29,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 // Layout constants
 const MIN_SET_CONTINUATION = 250;
+const DATE_ROLE_H = 56;
 const A4_HEIGHT = 1122;
 const A4_WIDTH = 794;
 const LETTER_HEIGHT = 1056;
@@ -621,15 +622,21 @@ export const PDFDesigner: React.FC = () => {
     private get column() {
       return this.columnSet.columns[this.currentColumnIndex];
     }
+
     private get pageInnerHeight() {
-      const effectiveCoverHeight = this.isMacroMemo ? MACROMEMO_COVER_HEIGHT : this.config.coverHeight;
-      let h = this.page?.isFirstPage
-        ? this.config.pageHeight - effectiveCoverHeight // <- keep ALL padding
-        : this.config.pageHeight - this.config.pagePaddingTop - this.config.pagePaddingBottom;
-      /* subtract page‑title header on all non‑cover pages */
-      if (!this.page?.isFirstPage && this.includeTitleHeader) {
-        h -= 36; // keep in sync with DOM header height
+      const cover = this.isMacroMemo ? MACROMEMO_COVER_HEIGHT : this.config.coverHeight;
+
+      if (this.page?.isFirstPage) {
+        let h = this.config.pageHeight - cover - this.config.pagePaddingTop - this.config.pagePaddingBottom;
+
+        if (this.includeDateRole) h -= DATE_ROLE_H;
+        return h;
       }
+
+      // normal pages
+      let h = this.config.pageHeight - this.config.pagePaddingTop - this.config.pagePaddingBottom;
+
+      if (this.includeTitleHeader) h -= 36;
       return h;
     }
 
@@ -1126,7 +1133,7 @@ export const PDFDesigner: React.FC = () => {
           pageEl.appendChild(cover); // Add date and role if enabled
           if (this.includeDateRole) {
             const dateRole = document.createElement("div");
-            dateRole.className = "date-role-section py-4 px-6";
+            dateRole.className = "date-role-section pt-4 pb-0 px-[40px]";
             dateRole.innerHTML = `
               <div class="flex justify-between text-sm text-gray-600">
                 <div>${this.dateValue || article.date || new Date().toLocaleDateString()}</div>

@@ -141,11 +141,6 @@
   box-sizing: border-box;
 }
 
-.pdf-section.atomic .caption {
-  /* keep italic centering even inside atomic */
-  @apply text-sm text-gray-600 mt-2 text-center italic;
-}
-
 /* Wrapper for the main content area (profile + content) */
 .content-wrapper {
   display: flex;
