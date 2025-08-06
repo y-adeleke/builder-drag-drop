@@ -253,32 +253,13 @@ export const PDFDesigner: React.FC = () => {
     return false;
     // return /(large|_xl|big|banner|hero)\.(jpg|png|jpeg)/i.test(src);
   };
+
   /**
-   * Determines if a section should use 2-column layout based on text content
+   * Single source of truth:
+   *   • If the global toggle is ON  → every section returns true.
+   *   • Otherwise                  → always false (pure one-column flow).
    */
-  const shouldSectionUse2Column = (section: any): boolean => {
-    // If global 2-column layout is enabled, always return true
-    if (use2ColumnLayout) {
-      return true;
-    }
-
-    // Check all text blocks in the section
-    const allTextBlocks = [...section.content];
-
-    // Add subsection content if it exists
-    if (section.subsections) {
-      section.subsections.forEach((subsection: any) => {
-        allTextBlocks.push(...subsection.content);
-      });
-    }
-
-    // Find text elements and calculate total character count
-    const textElements = allTextBlocks.filter((block) => block.type === "paragraph");
-    const totalTextLength = textElements.reduce((sum, block) => sum + (block.text?.length || 0), 0);
-
-    console.log(`Section text analysis: ${textElements.length} paragraphs, ${totalTextLength} chars, 2-col=${totalTextLength > 700}`);
-    return totalTextLength > 700;
-  };
+  const shouldSectionUse2Column = () => use2ColumnLayout;
 
   /**
    * Renders a complete section with all its content
@@ -487,9 +468,14 @@ export const PDFDesigner: React.FC = () => {
     uploadedCoverImage,
   ]);
 
-  /**
-   * Flattens a section's content into a single array of elements for processing.
-   */
+  /** ----------------------------------------------------------------
+   *  Flatten a section into a linear array of layout elements.
+   *  – All consecutive headings are clustered together.
+   *  – If the *first* non-heading block is NOT a paragraph (image, list,
+   *    table, etc.) we glue it to the cluster. Paragraphs stay separate.
+   *  – Section-level heading is injected in-band so it’s treated the same
+   *    way as sub-headings.
+   * ---------------------------------------------------------------- */
   const flattenSectionToElements = (section: any, sectionIndex: number): any[] => {
     const elements: any[] = [];
     const sectionId = `section-${sectionIndex}`;
@@ -655,8 +641,8 @@ export const PDFDesigner: React.FC = () => {
       const COLUMN_BOTTOM_GUTTER = 0; //12
       return { width, height: height - COLUMN_BOTTOM_GUTTER, is2Column, content: [], contentHeight: 0 };
     }
-    private makeColumnSet(use2Col: boolean, maxH: number, availW: number): VColumnSet {
-      const shouldUse2Col = this.use2ColumnLayout || use2Col;
+    private makeColumnSet(force2Col: boolean, maxH: number, availW: number): VColumnSet {
+      const shouldUse2Col = this.use2ColumnLayout || force2Col;
 
       if (shouldUse2Col) {
         const colWidth = (availW - this.config.gapMin) / 2;
@@ -684,6 +670,7 @@ export const PDFDesigner: React.FC = () => {
           ? this.config.pageWidth - this.config.profileWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight
           : this.config.pageWidth - this.config.pagePaddingLeft - this.config.pagePaddingRight;
 
+      // honour the one-column default by passing the caller’s intent verbatim
       const set = this.makeColumnSet(force2Col, remaining, availableWidth);
       this.page.columnSets.push(set);
 
@@ -698,10 +685,13 @@ export const PDFDesigner: React.FC = () => {
       this.currentColumnIndex = 0;
       this.createNewPage(true, this.use2ColumnLayout || this.isMacroMemo);
 
-      this.allElements = article.sections.flatMap((section, idx) => {
-        const use2Col = shouldSectionUse2Column(section);
-        return flattenSectionToElements(section, idx).map((el) => ({ ...el, use2Col }));
-      });
+      const global2Col = this.use2ColumnLayout;
+      this.allElements = article.sections.flatMap((section, idx) =>
+        flattenSectionToElements(section, idx).map((el) => ({
+          ...el,
+          use2Col: global2Col,
+        }))
+      );
 
       for (let i = 0; i < this.allElements.length; ) {
         const el = this.allElements[i];

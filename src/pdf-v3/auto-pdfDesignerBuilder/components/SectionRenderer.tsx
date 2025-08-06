@@ -54,7 +54,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
     case "image":
       return (
         <div style={mergedStyle} className="pdf-section image break-inside-avoid">
-          <img src={block.src} alt={block.alt || ""} className="w-full rounded shadow-sm" style={{ maxHeight: "400px", objectFit: "cover" }} />
+          <img src={block.src} alt={block.alt || ""} className="w-full rounded shadow-sm" style={{ maxHeight: 400, width: "100%", objectFit: "cover" }} />
           {block.caption && <p className="pdf-section caption text-xs text-gray-600 mt-2 italic">{block.caption}</p>}
         </div>
       );
