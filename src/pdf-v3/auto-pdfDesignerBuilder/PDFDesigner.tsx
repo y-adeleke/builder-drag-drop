@@ -213,7 +213,7 @@ export const PDFDesigner: React.FC = () => {
       const mb = last ? parseFloat(getComputedStyle(last).marginBottom) || 0 : 0;
 
       container.removeChild(probe);
-      const SAFETY = 0; //12;
+      const SAFETY = 2;
 
       console.log(`Height measurement: ${html.slice(0, 50)}... → ${Math.ceil(rectH + mt + mb) + SAFETY}px`);
       return Math.ceil(rectH + mt + mb) + SAFETY;
@@ -480,57 +480,31 @@ export const PDFDesigner: React.FC = () => {
     const elements: any[] = [];
     const sectionId = `section-${sectionIndex}`;
 
+    // push section heading as a normal block (no grouping)
     if (section.heading) {
       elements.push({
         ...section.heading,
         isMainHeading: section.heading.level === 1,
         sectionId,
+        type: "heading",
       });
     }
 
-    let contentBlocks: ContentBlock[] = [...section.content];
+    // push section content as-is
+    section.content?.forEach((b: any) => elements.push({ ...b, sectionId }));
 
-    if (section.subsections) {
-      section.subsections.forEach((subsection: any) => {
-        if (subsection.heading) {
-          contentBlocks.push({
-            ...subsection.heading,
-            isMainHeading: false, // Mark subsection headings
-          });
-        }
-        contentBlocks.push(...subsection.content);
-      });
-    }
-
-    for (let i = 0; i < contentBlocks.length; i++) {
-      const block = contentBlocks[i];
-
-      /* 2️⃣  HEADING + FIRST BODY  (NEW) */
-      if ((block.type === "heading" || block.isMainHeading) && i + 1 < contentBlocks.length) {
-        const next = contentBlocks[i + 1];
-        // don’t glue two headings together
-        if (next.type !== "heading" && !next.isMainHeading) {
-          elements.push({
-            type: "atomic",
-            isHeadingCluster: true, // mark so we can style it later if needed
-            content: [block, next],
-            use2Col: next.use2Col, // inherit 1‑/2‑col intent from the body block
-            sectionId,
-          });
-          i++; // skip the body we just packed
-          continue;
-        }
+    // inline subsections (headings included) without grouping
+    section.subsections?.forEach((sub: any) => {
+      if (sub.heading) {
+        elements.push({
+          ...sub.heading,
+          isMainHeading: false,
+          sectionId,
+          type: "heading",
+        });
       }
-
-      /* 3️⃣  LIST ITEMS  (unchanged) */
-      if (block.type === "list") {
-        block.items?.forEach((txt) => elements.push({ type: "li", text: txt, sectionId, use2Col: block.use2Col }));
-        continue;
-      }
-
-      /* 4️⃣  EVERYTHING ELSE  */
-      elements.push({ ...block, sectionId });
-    }
+      sub.content?.forEach((b: any) => elements.push({ ...b, sectionId }));
+    });
 
     return elements;
   };
@@ -710,24 +684,107 @@ export const PDFDesigner: React.FC = () => {
     private async placeElement(element: any, idx: number | null = null, isRetry = false): Promise<number> {
       const EXTRA_ATOMIC_BUFFER = 24; // extra space to ensure atomic blocks fit
 
-      /* 0️⃣  orphan‑heading guard -------------------------------------------- */
-      if (element.type === "heading" && idx != null && idx + 1 < this.allElements.length) {
-        const nxt = this.allElements[idx + 1];
-        if (nxt.type !== "heading" && !nxt.isMainHeading) {
-          // 1. Measure heading + next block
-          const hHtml = renderToString(<SectionRenderer block={element} theme={this.theme} />);
-          const hH = await this.measureHeight(hHtml, this.column.width, this.column.is2Column);
+      // Keep-with-next for heading(s): don't leave a heading as the last item
+      if (element.type === "heading" || element.isMainHeading) {
+        // H1 that spans stays a spanning block in 2-col
+        if (element.isMainHeading && this.columnSet.columns.length > 1) {
+          await this.placeSpanningElement(element);
+          return 1;
+        }
 
-          const nHtml = renderToString(<SectionRenderer block={nxt} theme={this.theme} />);
-          const nH = await this.measureHeight(nHtml, this.column.width, this.column.is2Column);
-
-          const free = this.column.height - this.column.contentHeight;
-
-          // 2. If pair won’t fit together, start a fresh column *before* the heading
-          if (hH + nH > free) {
-            this.moveToNextColumnOrSet(nxt.use2Col);
+        // Make sure the column-set layout matches before measuring
+        const wants2Col = this.use2ColumnLayout || !!element.use2Col;
+        const is2ColSet = this.columnSet.columns.length > 1;
+        if (wants2Col !== is2ColSet) {
+          const spare = this.remainingSetHeight();
+          if (spare >= MIN_SET_CONTINUATION) {
+            this.createNewColumnSet(wants2Col);
+          } else {
+            this.createNewPage(false, wants2Col);
           }
         }
+
+        // Collect consecutive headings + the first non-heading after them
+        const headBlocks: any[] = [];
+        let nextBlock: any | null = null;
+
+        if (idx !== null) {
+          for (let k = idx; k < this.allElements.length; k++) {
+            const cand = this.allElements[k];
+            if (cand.type === "heading" || cand.isMainHeading) {
+              headBlocks.push(cand);
+            } else {
+              nextBlock = cand;
+              break;
+            }
+          }
+        } else {
+          headBlocks.push(element);
+        }
+
+        const measure = async (b: any, width: number, is2: boolean) => {
+          const h = renderToString(<SectionRenderer block={b} theme={this.theme} />);
+          return await this.measureHeight(h, width, is2);
+        };
+
+        // Measure in current column context
+        let col = this.column;
+        let colWidth = col.width;
+        let colIs2 = col.is2Column;
+
+        let hHeights: number[] = [];
+        for (const hb of headBlocks) {
+          hHeights.push(await measure(hb, colWidth, colIs2));
+        }
+        let headingsTotal = hHeights.reduce((s, n) => s + n, 0);
+        let nextH = 0;
+        if (nextBlock) nextH = await measure(nextBlock, colWidth, colIs2);
+
+        // If headings + first content won't fit, move BEFORE placing anything
+        // ✅ Keep-with-next: force headings + first body to fit together
+        if (nextBlock) {
+          let guard = 0;
+          while (guard++ < 6) {
+            const remaining = col.height - col.contentHeight;
+
+            // pair fits → stop
+            if (headingsTotal + nextH <= remaining) break;
+
+            // headings alone don't fit this column at all → give up keep-with-next (rare)
+            if (headingsTotal > col.height) break;
+
+            // otherwise advance and re-measure in the new context
+            this.moveToNextColumnOrSet(this.use2ColumnLayout || !!element.use2Col);
+
+            col = this.column;
+            colWidth = col.width;
+            colIs2 = col.is2Column;
+
+            hHeights = [];
+            for (const hb of headBlocks) hHeights.push(await measure(hb, colWidth, colIs2));
+            headingsTotal = hHeights.reduce((s, n) => s + n, 0);
+            nextH = await measure(nextBlock, colWidth, colIs2);
+          }
+        }
+
+        // Place the heading(s)
+        for (let i = 0; i < headBlocks.length; i++) {
+          await this.addElementToColumn(headBlocks[i], hHeights[i]);
+        }
+
+        // Try to place the first non-heading with them to avoid orphan heading
+        const curCol = this.column;
+        const nextHtml = renderToString(<SectionRenderer block={nextBlock} theme={this.theme} />);
+        const nextHNow = await this.measureHeight(nextHtml, curCol.width, curCol.is2Column);
+        const remainingNow = curCol.height - curCol.contentHeight;
+        if (nextBlock && nextHNow <= remainingNow) {
+          await this.addElementToColumn(nextBlock, nextHNow);
+          return headBlocks.length + 1;
+        }
+        return headBlocks.length;
+
+        // No following content — just return the number of heading blocks we consumed
+        return headBlocks.length;
       }
 
       /* –1.  Keep image‑caption atomic together ---------------------------------- */
@@ -739,16 +796,16 @@ export const PDFDesigner: React.FC = () => {
         // ensure we have *somewhere* that will fit it
         const ensureRoom = () => {
           const free = this.column.height - this.column.contentHeight;
-          if (h <= free) return; // good – it fits now
+          if (h <= free) return;
 
-          // not enough room in current column → advance horizontally / vertically
+          // advance horizontally / vertically
           this.moveToNextColumnOrSet(element.use2Col);
 
-          // edge‑case: we've created a new column‑set that is still too short
-          if (h > this.column.height) {
-            this.createNewPage(false, element.use2Col); // blank page, full height
-          }
-          ensureRoom(); // re‑check recursively
+          // If the block is taller than the column itself, we cannot make more room.
+          // Bail out and let addElementToColumn's oversize guard handle it.
+          if (h > this.column.height) return;
+
+          ensureRoom(); // re-check only when it CAN eventually fit
         };
 
         ensureRoom(); // ⚑ guarantee a tall-enough column before placing
@@ -759,7 +816,7 @@ export const PDFDesigner: React.FC = () => {
           this.moveToNextColumnOrSet(element.use2Col);
         }
 
-        this.addElementToColumn(element, h);
+        await this.addElementToColumn(element, h);
         return 1;
       }
 
@@ -806,7 +863,7 @@ export const PDFDesigner: React.FC = () => {
 
       /* 3a. Fits → just add */
       if (elHeight <= remaining) {
-        this.addElementToColumn(element, elHeight);
+        await this.addElementToColumn(element, elHeight);
         return;
       }
 
@@ -837,13 +894,13 @@ export const PDFDesigner: React.FC = () => {
         const shrunkHtml = renderToString(<SectionRenderer block={shrunk} theme={this.theme} />);
         const shrunkH = await this.measureHeight(shrunkHtml, col.width, col.is2Column);
         if (shrunkH <= col.height) {
-          this.addElementToColumn(shrunk, shrunkH);
+          await this.addElementToColumn(shrunk, shrunkH);
           return;
         }
       }
 
       /* 3e. Couldn’t fit → force, then continue */
-      this.addElementToColumn(element, elHeight);
+      await this.addElementToColumn(element, elHeight);
       return 1;
     }
 
@@ -964,8 +1021,36 @@ export const PDFDesigner: React.FC = () => {
       const hasContentInColumns = currentPage.columnSets.some((set) => set.columns.some((col) => col.content.length > 0));
 
       if (hasContentInColumns || currentSpanningHeight + elementHeight > totalColumnHeight) {
-        this.createNewPage(false, element.use2Col);
-        await this.placeSpanningElement(element); // call again, and await
+        // If even an empty page can't fit it, try shrink before giving up
+        const emptyRoom = this.pageInnerHeight; // available spanning height on a blank page
+
+        if (elementHeight > emptyRoom) {
+          if ((element as any).type === "image" || (element as any).type === "atomic") {
+            const shrunk: ContentBlock = {
+              ...(element as any),
+              style: {
+                ...((element as any).style || {}),
+                transform: `scale(${this.config.shrinkLimit})`,
+                transformOrigin: "top left",
+              },
+            } as any;
+
+            const shrunkHtml = renderToString(<SectionRenderer block={shrunk} theme={this.theme} />);
+            const shrunkH = await this.measureHeight(shrunkHtml, availableWidth, false);
+            if (shrunkH <= emptyRoom) {
+              currentPage.spanningElements.push(shrunk);
+              return;
+            }
+          }
+
+          // Fallback: move to a fresh page to avoid clipping
+          this.createNewPage(false, (element as any).use2Col);
+          this.pages[this.currentPageIndex].spanningElements.push(element);
+          return;
+        }
+
+        this.createNewPage(false, (element as any).use2Col);
+        await this.placeSpanningElement(element);
         return;
       }
 
@@ -1021,32 +1106,67 @@ export const PDFDesigner: React.FC = () => {
       }
     }
 
-    private addElementToColumn(el: ContentBlock, h: number) {
-      const c = this.column;
-      /* FINAL SAFETY NET – if reality is bigger than plan, roll the
-   element back out and drop to the next column / set / page      */
-      if (c.contentHeight + h > c.height) {
-        // move horizontally / vertically first
+    // replaces: private addElementToColumn(el: ContentBlock, h: number)
+    private async addElementToColumn(el: ContentBlock, measuredH?: number): Promise<void> {
+      let c = this.column;
+      const EPS = 2; // rounding safety to avoid visual clipping
+
+      // Measure for the *current* column context
+      const measureHere = async (blk: ContentBlock) => {
+        const html = renderToString(<SectionRenderer block={blk} theme={this.theme} />);
+        return await this.measureHeight(html, this.column.width, this.column.is2Column);
+      };
+
+      // Use provided height if given; otherwise measure now
+      let h = typeof measuredH === "number" ? measuredH : await measureHere(el);
+
+      // If adding would overflow THIS column, move and re-measure in the new context
+      if (c.contentHeight + h > c.height - EPS) {
         this.moveToNextColumnOrSet(el.use2Col);
 
-        // extreme case – fresh column still too small (huge chart etc.)
-        if (h > this.column.height) {
-          this.createNewPage(false, el.use2Col);
+        // Rebind + re-measure because width/2-col may have changed
+        c = this.column;
+        h = await measureHere(el);
+
+        // Still taller than the column itself? Try shrink if allowed
+        if (h > c.height - EPS) {
+          if (el.type === "image" || el.type === "atomic") {
+            const shrunk: ContentBlock = {
+              ...el,
+              style: {
+                ...(el.style || {}),
+                transform: `scale(${this.config.shrinkLimit})`,
+                transformOrigin: "top left",
+              },
+            } as any;
+
+            const shrunkH = await measureHere(shrunk);
+            if (shrunkH <= c.height - EPS) {
+              c.content.push(shrunk);
+              c.contentHeight += shrunkH + EPS;
+              this.flatElementsIndex.push({ use2Col: !!el.use2Col, pageIdx: this.currentPageIndex, setIdx: this.currentColumnSetIndex });
+              return;
+            }
+          }
+
+          // LAST RESORT: place-and-clamp (only for truly over-tall content to avoid recursion)
+          c.content.push(el);
+          c.contentHeight = c.height;
+          this.flatElementsIndex.push({ use2Col: !!el.use2Col, pageIdx: this.currentPageIndex, setIdx: this.currentColumnSetIndex });
+          return;
         }
 
-        // try again in the new location
-        this.addElementToColumn(el, h);
+        // Fits after moving/re-measuring → place normally
+        c.content.push(el);
+        c.contentHeight += h + EPS;
+        this.flatElementsIndex.push({ use2Col: !!el.use2Col, pageIdx: this.currentPageIndex, setIdx: this.currentColumnSetIndex });
         return;
       }
-      c.content.push(el);
-      c.contentHeight += h;
 
-      // Track for peekNextUse2Col
-      this.flatElementsIndex.push({
-        use2Col: !!el.use2Col,
-        pageIdx: this.currentPageIndex,
-        setIdx: this.currentColumnSetIndex,
-      });
+      // Fits here → place normally
+      c.content.push(el);
+      c.contentHeight += h + EPS;
+      this.flatElementsIndex.push({ use2Col: !!el.use2Col, pageIdx: this.currentPageIndex, setIdx: this.currentColumnSetIndex });
     }
 
     private moveToNextColumnOrSet(expected2Col: boolean) {
@@ -1059,7 +1179,7 @@ export const PDFDesigner: React.FC = () => {
       const used = Math.max(...this.columnSet.columns.map((c) => c.contentHeight));
       const spareInSet = this.columnSet.height - used;
 
-      if (spareInSet >= MIN_SET_CONTINUATION) {
+      if (spareInSet >= MIN_SET_CONTINUATION && used > 0) {
         // 1⃣ shrink current set so the page knows that space is free
         this.columnSet.height = used;
         this.columnSet.columns.forEach((c) => (c.height = used));
