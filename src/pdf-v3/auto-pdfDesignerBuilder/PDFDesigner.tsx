@@ -47,6 +47,12 @@ const PAGE_PADDING_TOP = 40;
 const PAGE_PADDING_BOTTOM = 40;
 const PAGE_PADDING_RIGHT = 40;
 const PAGE_PADDING_LEFT = 40;
+const IMG_MAX_H_DEFAULT = 250; // matches your <img style>
+const IMG_MAX_H_MIN = 140; // don't go below this
+const IMG_MAX_H_STEP = 20; // shrink steps
+const ONE_LINE_EPS_PX = 3; // measurement tolerance
+const ONE_LINE_MAX_CHARS = 140; // micro-guard (optional)
+
 // const CONTENT_WIDTH = A4_WIDTH - PROFILE_WIDTH - PAGE_PADDING * 3; // Remaining width for content
 const MACRO_MEMO_COVER = "/cover-images/macromemo.png";
 
@@ -62,6 +68,9 @@ export const PAGE_SIZES = {
     label: "Tabloid/Ledger",
   },
 };
+
+const isTitle = (b: any) => b?.type === "heading"; // h1–h6 are already headings
+const isImage = (b: any) => b?.type === "image";
 
 export const PDFDesigner: React.FC = () => {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -600,6 +609,161 @@ export const PDFDesigner: React.FC = () => {
       return h;
     }
 
+    /** Measure a block in current column context */
+    private async measureBlock(blk: ContentBlock): Promise<number> {
+      const html = renderToString(<SectionRenderer block={blk} theme={this.theme} />);
+      return await this.measureHeight(html, this.column.width, this.column.is2Column);
+    }
+
+    /** Is a paragraph visually single line? Compare to measured single-line height. */
+    private async isOneLineParagraph(block: any): Promise<boolean> {
+      if (block?.type !== "paragraph" || typeof block.text !== "string") return false;
+
+      // Create a sample paragraph that renders exactly one line (ascenders/descenders included)
+      const sample: any = { ...block, text: "Hg" };
+      const sampleH = await this.measureBlock(sample);
+      const actualH = await this.measureBlock(block);
+
+      //  if (block.text.length > ONE_LINE_MAX_CHARS) return false;
+      return actualH <= sampleH + ONE_LINE_EPS_PX;
+    }
+
+    /** Try to extract a CardTile starting at index i (title? -> kicker? -> image) */
+    private async extractCardAt(elements: any[], i: number): Promise<null | readonly [any, number]> {
+      let consumed = 0;
+      let title: any | undefined;
+      let kicker: any | undefined;
+      let image: any | undefined;
+
+      // optional title
+      if (isTitle(elements[i])) {
+        title = elements[i];
+        consumed++;
+      }
+
+      // optional kicker: title OR one-line paragraph
+      const maybeKicker = elements[i + consumed];
+      if (maybeKicker && (isTitle(maybeKicker) || (maybeKicker.type === "paragraph" && (await this.isOneLineParagraph(maybeKicker))))) {
+        kicker = maybeKicker;
+        consumed++;
+      }
+
+      // image (mandatory)
+      const maybeImg = elements[i + consumed];
+      if (maybeImg && isImage(maybeImg)) {
+        image = maybeImg;
+        consumed++;
+      } else {
+        return null;
+      }
+
+      const card = { type: "cardTile", title, kicker, image };
+      return [card, consumed] as const;
+    }
+
+    /** Build PairedFeature (with optional lead row) in one-column mode */
+    private async transformForCardPairs(elements: any[]): Promise<any[]> {
+      const out: any[] = [];
+
+      // helper: collect up to two lead ITEMS (each item may be title? + paragraph?)
+      const collectLeadItems = async (from: number) => {
+        const items: Array<{ title?: any; paragraph?: any }> = [];
+        let p = from;
+
+        while (items.length < 2) {
+          // If the sequence at p already forms a card, stop — this belongs to right card.
+          const tryRight = await this.extractCardAt(elements, p);
+          if (tryRight) break;
+
+          const a = elements[p];
+          if (!a) break;
+
+          // Only headings/paragraphs can be lead content
+          if (!(isTitle(a) || a.type === "paragraph")) break;
+
+          const item: { title?: any; paragraph?: any } = {};
+
+          // If we have a heading, take it as the item.title
+          if (isTitle(a)) {
+            item.title = a;
+            p++;
+
+            // If the next block is a paragraph, treat it as the same item’s paragraph
+            if (elements[p]?.type === "paragraph") {
+              item.paragraph = elements[p];
+              p++;
+            }
+          } else {
+            // Paragraph-only item
+            item.paragraph = a;
+            p++;
+          }
+
+          items.push(item);
+        }
+
+        return { items, nextIndex: p };
+      };
+
+      for (let i = 0; i < elements.length; ) {
+        // never regroup main H1 spans or already grouped features
+        if (elements[i].isMainHeading || elements[i].type === "pairedFeature") {
+          out.push(elements[i++]);
+          continue;
+        }
+
+        // try to form the LEFT card
+        const left = await this.extractCardAt(elements, i);
+        if (!left) {
+          out.push(elements[i++]);
+          continue;
+        }
+
+        // position after the left card
+        let j = i + left[1];
+
+        // 1) Try to form the RIGHT card **immediately**
+        let right = await this.extractCardAt(elements, j);
+
+        // 2) If right card is not there yet, collect up to two lead items
+        let leadItems: Array<{ title?: any; paragraph?: any }> = [];
+        if (!right) {
+          const { items, nextIndex } = await collectLeadItems(j);
+          leadItems = items;
+          j = nextIndex;
+          // After collecting lead, try for RIGHT again
+          right = await this.extractCardAt(elements, j);
+        }
+
+        // If we still don’t have a right card, just output the left blocks raw
+        if (!right) {
+          out.push(...elements.slice(i, i + left[1]));
+          i += left[1];
+          continue;
+        }
+
+        // We have a pair. Build the PairedFeature.
+        const pf: any = { type: "pairedFeature", items: [left[0], right[0]] };
+
+        // Map 0..2 lead items into lead.left / lead.right with (title?, paragraph?)
+        if (leadItems.length === 1) {
+          const b = leadItems[0];
+          pf.lead = { left: { ...(b.title ? { title: b.title } : {}), ...(b.paragraph ? { paragraph: b.paragraph } : {}) } };
+        } else if (leadItems.length === 2) {
+          const [b1, b2] = leadItems;
+          pf.lead = {
+            left: { ...(b1.title ? { title: b1.title } : {}), ...(b1.paragraph ? { paragraph: b1.paragraph } : {}) },
+            right: { ...(b2.title ? { title: b2.title } : {}), ...(b2.paragraph ? { paragraph: b2.paragraph } : {}) },
+          };
+        }
+
+        out.push(pf);
+        i = j + right[1];
+      }
+
+      return out;
+    }
+
     private remainingSetHeight() {
       // highest column in the current set decides how much Y we’ve used
       const used = Math.max(...this.columnSet.columns.map((c) => c.contentHeight));
@@ -666,6 +830,11 @@ export const PDFDesigner: React.FC = () => {
           use2Col: global2Col,
         }))
       );
+
+      // ⬇️ regroup into paired features only in ONE-COLUMN mode
+      if (!global2Col) {
+        this.allElements = await this.transformForCardPairs(this.allElements);
+      }
 
       for (let i = 0; i < this.allElements.length; ) {
         const el = this.allElements[i];
@@ -788,35 +957,102 @@ export const PDFDesigner: React.FC = () => {
       }
 
       /* –1.  Keep image‑caption atomic together ---------------------------------- */
-      if (element.type === "atomic") {
-        // full HTML once, so we don't recalc later
-        const html = renderToString(<SectionRenderer block={element} theme={this.theme} />);
-        const h = await this.measureHeight(html, this.column.width, this.column.is2Column);
+      /* –1.  Keep image-caption atomic together ---------------------------------- */
+      if (element.type === "atomic" || element.type === "pairedFeature") {
+        // 1) measure once in the *current* column context
+        const initialHtml = renderToString(<SectionRenderer block={element} theme={this.theme} />);
+        let measuredH = await this.measureHeight(initialHtml, this.column.width, this.column.is2Column);
 
-        // ensure we have *somewhere* that will fit it
         const ensureRoom = () => {
           const free = this.column.height - this.column.contentHeight;
-          if (h <= free) return;
+          if (measuredH <= free) return;
 
           // advance horizontally / vertically
           this.moveToNextColumnOrSet(element.use2Col);
 
-          // If the block is taller than the column itself, we cannot make more room.
-          // Bail out and let addElementToColumn's oversize guard handle it.
-          if (h > this.column.height) return;
+          // if the block is taller than the column itself, we cannot make more room.
+          // bail out and let addElementToColumn's oversize guard handle it.
+          if (measuredH > this.column.height) return;
 
-          ensureRoom(); // re-check only when it CAN eventually fit
+          // re-check with the new free space (same measuredH is OK if width unchanged)
+          ensureRoom();
         };
 
-        ensureRoom(); // ⚑ guarantee a tall-enough column before placing
+        // ensure we have somewhere that can eventually fit it
+        ensureRoom();
 
-        // Now enforce the “one extra line” rule
-        const FREE = this.column.height - this.column.contentHeight;
-        if (h + EXTRA_ATOMIC_BUFFER > FREE) {
-          this.moveToNextColumnOrSet(element.use2Col);
+        // IMPORTANT: after moving, column width may have changed (e.g., first page vs others).
+        // Re-measure for the *current* column context before the actual placement work starts.
+        measuredH = await this.measureHeight(renderToString(<SectionRenderer block={element} theme={this.theme} />), this.column.width, this.column.is2Column);
+
+        // 2) If it's a pairedFeature, do image-only shrink using --img-max-h
+        if (element.type === "pairedFeature") {
+          console.log("PairedFeature detected, trying to shrink images...", element);
+          const tryShrink = async (maxH: number) => {
+            // deep clone is fine here; blocks are POJOs
+            const clone: any = JSON.parse(JSON.stringify(element));
+            for (const t of clone.items) {
+              if (t?.image) {
+                t.image.style = { ...(t.image.style || {}), ["--img-max-h"]: `${maxH}px` };
+              }
+            }
+            const shrunkHtml = renderToString(<SectionRenderer block={clone} theme={this.theme} />);
+            const shrunkH = await this.measureHeight(shrunkHtml, this.column.width, this.column.is2Column);
+            return { clone, shrunkH };
+          };
+
+          const colFree = this.column.height - this.column.contentHeight;
+          let bestBlock: any = element;
+          let bestH = measuredH;
+
+          // First pass: try to fit in the current column
+          if (bestH > colFree) {
+            for (let mh = IMG_MAX_H_DEFAULT - IMG_MAX_H_STEP; mh >= IMG_MAX_H_MIN; mh -= IMG_MAX_H_STEP) {
+              const { clone, shrunkH } = await tryShrink(mh);
+              if (shrunkH <= colFree) {
+                bestBlock = clone;
+                bestH = shrunkH;
+                break;
+              }
+              if (shrunkH < bestH) {
+                bestBlock = clone;
+                bestH = shrunkH;
+              }
+            }
+          }
+
+          // Second pass: if still too tall, move once and try again against a fresh column
+          if (bestH > colFree) {
+            this.moveToNextColumnOrSet(element.use2Col);
+            const free2 = this.column.height - this.column.contentHeight;
+
+            for (let mh = IMG_MAX_H_DEFAULT; mh >= IMG_MAX_H_MIN; mh -= IMG_MAX_H_STEP) {
+              const { clone, shrunkH } = await tryShrink(mh);
+              if (shrunkH <= free2) {
+                bestBlock = clone;
+                bestH = shrunkH;
+                break;
+              }
+              if (shrunkH < bestH) {
+                bestBlock = clone;
+                bestH = shrunkH;
+              }
+            }
+          }
+
+          await this.addElementToColumn(bestBlock, bestH);
+          return 1;
         }
 
-        await this.addElementToColumn(element, h);
+        // 3) Non-paired atomic fallback (original behavior — no image-only shrink here)
+        const FREE = this.column.height - this.column.contentHeight;
+        if (measuredH + EXTRA_ATOMIC_BUFFER > FREE) {
+          this.moveToNextColumnOrSet(element.use2Col);
+        }
+        // Re-measure one final time in case width changed again:
+        measuredH = await this.measureHeight(renderToString(<SectionRenderer block={element} theme={this.theme} />), this.column.width, this.column.is2Column);
+
+        await this.addElementToColumn(element, measuredH);
         return 1;
       }
 

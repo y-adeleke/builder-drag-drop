@@ -1,5 +1,5 @@
 // components/SectionRenderer.tsx
-import React, { CSSProperties } from "react";
+import React, { CSSProperties, JSX } from "react";
 import { ContentBlock, Theme } from "../types";
 
 // Helper: Convert kebab-case to camelCase for CSS properties
@@ -11,7 +11,12 @@ const fixCSSStyle = (style?: CSSProperties): CSSProperties | undefined => {
 
   const fixedStyle: Record<string, any> = {};
   Object.entries(style).forEach(([key, value]) => {
-    fixedStyle[toCamelCase(key)] = value;
+    if (key.startsWith("--")) {
+      // Preserve CSS variables as-is
+      fixedStyle[key] = value;
+    } else {
+      fixedStyle[toCamelCase(key)] = value;
+    }
   });
 
   return fixedStyle;
@@ -32,12 +37,13 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
   // Render based on block type
   switch (block.type) {
     case "heading": {
-      const HeadingTag = block.level === 1 ? "h1" : block.level === 3 ? "h3" : "h2";
+      const lvl = Math.min(Math.max(block.level ?? 2, 1), 6);
+      const Tag = `h${lvl}` as unknown as keyof JSX.IntrinsicElements;
       return (
-        <div style={mergedStyle} className={`pdf-section heading break-inside-avoid`}>
-          <HeadingTag className={`font-bold leading-tight header-color`} style={{ fontSize: "14px" }}>
+        <div style={mergedStyle} className="pdf-section heading break-inside-avoid">
+          <Tag className="font-bold leading-tight header-color" style={{ fontSize: "14px" }}>
             {block.text}
-          </HeadingTag>
+          </Tag>
         </div>
       );
     }
@@ -201,6 +207,54 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ block, theme }
 
     case "caption":
       return <p className="pdf-section caption text-sm text-gray-600 mt-2 text-center italic">{block.text}</p>;
+
+    case "cardTile": {
+      const { title, kicker, image } = block as any;
+      return (
+        <div style={mergedStyle} className="pdf-section card-tile break-inside-avoid">
+          {title && <SectionRenderer block={title} theme={theme} />}
+          {kicker && <SectionRenderer block={kicker} theme={theme} />}
+          <SectionRenderer block={image} theme={theme} />
+        </div>
+      );
+    }
+
+    case "pairedFeature": {
+      const pf = block as any;
+      return (
+        <div style={mergedStyle} className="pdf-section paired-feature break-inside-avoid">
+          {/* Lead row (optional) */}
+          {pf.lead &&
+            (pf.lead.right ? (
+              <div className="flex gap-4 mb-3">
+                <div className="w-1/2">
+                  {pf.lead.left?.title && <SectionRenderer block={pf.lead.left.title} theme={theme} />}
+                  {pf.lead.left?.paragraph && <SectionRenderer block={pf.lead.left.paragraph} theme={theme} />}
+                </div>
+                <div className="w-1/2">
+                  {pf.lead.right?.title && <SectionRenderer block={pf.lead.right.title} theme={theme} />}
+                  {pf.lead.right?.paragraph && <SectionRenderer block={pf.lead.right.paragraph} theme={theme} />}
+                </div>
+              </div>
+            ) : (
+              <div className="mb-3">
+                {pf.lead.left?.title && <SectionRenderer block={pf.lead.left.title} theme={theme} />}
+                {pf.lead.left?.paragraph && <SectionRenderer block={pf.lead.left.paragraph} theme={theme} />}
+              </div>
+            ))}
+
+          {/* Two feature tiles side-by-side */}
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <SectionRenderer block={pf.items[0]} theme={theme} />
+            </div>
+            <div className="w-1/2">
+              <SectionRenderer block={pf.items[1]} theme={theme} />
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     default:
       console.warn(`Unknown block type: ${(block as any).type}`);

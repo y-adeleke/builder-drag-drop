@@ -1,6 +1,25 @@
 // types/index.ts
 import { CSSProperties } from "react";
 
+// New types
+export type CardTile = {
+  type: "cardTile";
+  title?: ContentBlock;
+  kicker?: ContentBlock;
+  image: ContentBlock;
+  style?: React.CSSProperties;
+};
+
+export type PairedFeature = {
+  type: "pairedFeature";
+  lead?: {
+    left?: { title?: ContentBlock; paragraph?: ContentBlock };
+    right?: { title?: ContentBlock; paragraph?: ContentBlock };
+  };
+  items: [CardTile, CardTile];
+  style?: React.CSSProperties;
+};
+
 // ----------------------------------------------------------------
 // Content Block Types
 // ----------------------------------------------------------------
@@ -22,7 +41,9 @@ export type BlockType =
   | "caption"
   | "li"
   | "ul"
-  | "2col-section";
+  | "2col-section"
+  | "cardTile"
+  | "pairedFeature";
 
 export interface ContentBlock {
   type: BlockType;
